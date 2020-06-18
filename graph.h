@@ -4,9 +4,9 @@
 
 #ifndef TSPGENETICALGORITHM__GRAPH_H_
 #define TSPGENETICALGORITHM__GRAPH_H_
-
+#include <unordered_map>
 #include <vector>
-template<class T, class TId, class TValue>
+template<class T, class TId = unsigned long long, class TValue = unsigned long long>
 class graph {
  protected:
   T edge;
@@ -15,8 +15,8 @@ class graph {
   virtual ~graph() = default;
   explicit graph() = default;
   virtual void randomInit() = 0;
-  virtual TValue getValueEdge() = 0;
-  explicit graph(unsigned long long nNode): nodes(nNode) {};
+  virtual TValue getValueEdge(TId keyFrom, TId keyTo) = 0;
+  explicit graph(unsigned long long nNode) : nodes(nNode) {};
   inline explicit graph(std::vector<TId> nodes_){
     nodes=nodes_;
   };
@@ -25,5 +25,4 @@ class graph {
     edge=edge_;
   };
 };
-
 #endif //TSPGENETICALGORITHM__GRAPH_H_

@@ -8,16 +8,25 @@
 #include <vector>
 #include "graph.h"
 template<class TId = unsigned long long, class TValue = unsigned long long>
-class undirectedGraph : public graph<std::vector<std::unordered_map<TId, TValue>>, TId, TValue> {
+using edgeType = std::unordered_map<TId,std::unordered_map<TId, TValue>>;
+
+template<class TId = unsigned long long, class TValue = unsigned long long>
+class undirectedGraph : public graph<edgeType<TId,TValue>, TId, TValue> {
+
  public:
   ~undirectedGraph() override = default;
   explicit undirectedGraph() = default;
   explicit undirectedGraph(unsigned long long nNode);
   explicit undirectedGraph(std::vector<TId> nodes_);
-  explicit undirectedGraph(std::vector<TId> nodes_, std::vector<std::unordered_map<TId, TValue>> edge_);
+  explicit undirectedGraph(std::vector<TId> nodes_, edgeType<TId, TValue> edge_);
   void randomInit() override;
-  TValue getValueEdge() override;
+  TValue getValueEdge(TId keyFrom, TId keyTo) override;
 
 };
+
+template
+class undirectedGraph<int, int>;
+template
+class undirectedGraph<unsigned long long, unsigned long long>;
 
 #endif //TSPGENETICALGORITHM__UNDIRECTEDGRAPH_H_
