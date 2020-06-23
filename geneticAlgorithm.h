@@ -5,10 +5,9 @@
 #ifndef TSPGENETICALGORITHM__GENETICALGORITHM_H_
 #define TSPGENETICALGORITHM__GENETICALGORITHM_H_
 
-template<class T>
 class geneticAlgorithm {
  public:
-  virtual void initializer() = 0;
+  virtual void initializer(int totalPopulation) = 0;
   virtual void evaluate() = 0;
   virtual void selectionReproduction() = 0;
   virtual void crossover() = 0;
