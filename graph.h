@@ -28,5 +28,9 @@ class graph {
   const std::vector<TId> &getNodes() {
     return nodes;
   }
+  size_t getNodesSize() {
+    return nodes.size();
+  }
+
 };
 #endif //TSPGENETICALGORITHM__GRAPH_H_

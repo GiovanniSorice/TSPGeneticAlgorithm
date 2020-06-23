@@ -14,8 +14,8 @@ class TSPGeneticAlgorithm : public geneticAlgorithm {
  private:
   graph<TId, TValue>* graph_;
   //! population of chromosome
-  std::vector<std::vector<std::pair<TId, double>>> population;
-  std::vector<std::vector<std::pair<TId, double>>> intermediatePopulation;
+  std::vector<std::vector<TId >> population;
+  std::vector<std::vector<TId>> intermediatePopulation;
   //! random probability generator
   std::random_device rd;
   std::mt19937 gen{rd()};
