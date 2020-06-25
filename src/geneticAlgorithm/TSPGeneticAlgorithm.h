@@ -33,7 +33,6 @@ class TSPGeneticAlgorithm : public geneticAlgorithm {
   size_t totalPopulation;
   double randomProbabilityGenerator();
   void adjustPopulation();
-
  public:
   explicit TSPGeneticAlgorithm();
   explicit TSPGeneticAlgorithm(int seed_);

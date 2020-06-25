@@ -1,7 +1,8 @@
 //
 // Created by gs1010 on 31/05/20.
 //
-#define RELEASE
+#define TIME
+
 #include <random>
 #include <iostream>
 #include <algorithm>
@@ -10,7 +11,7 @@
 #include "../graph/undirectedGraph.h"
 template<typename TId, typename TValue>
 void TSPGeneticAlgorithm<TId, TValue>::initializer() {
-#ifdef RELEASE
+#ifdef TIME
   auto start = std::chrono::high_resolution_clock::now();
 #endif
 
@@ -62,7 +63,7 @@ double TSPGeneticAlgorithm<TId, TValue>::randomProbabilityGenerator() {
 }
 template<typename TId, typename TValue>
 void TSPGeneticAlgorithm<TId, TValue>::selectionReproduction() {
-#ifdef RELEASE
+#ifdef TIME
   auto start = std::chrono::high_resolution_clock::now();
 #endif
 
@@ -105,7 +106,7 @@ void TSPGeneticAlgorithm<TId, TValue>::selectionReproduction() {
     }
   }
 
-#ifdef RELEASE
+#ifdef TIME
   auto elapsed = std::chrono::high_resolution_clock::now() - start;
   auto msec = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count();
   printf("SelectionReproduction time (msecs): %ld\n", msec);
@@ -113,7 +114,7 @@ void TSPGeneticAlgorithm<TId, TValue>::selectionReproduction() {
 }
 template<typename TId, typename TValue>
 void TSPGeneticAlgorithm<TId, TValue>::crossover() {
-#ifdef RELEASE
+#ifdef TIME
   auto start = std::chrono::high_resolution_clock::now();
 #endif
 
@@ -161,7 +162,7 @@ void TSPGeneticAlgorithm<TId, TValue>::crossover() {
   }
   population.shrink_to_fit();
 
-#ifdef RELEASE
+#ifdef TIME
   auto elapsed = std::chrono::high_resolution_clock::now() - start;
   auto msec = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count();
   printf("Crossover time (msecs): %ld\n", msec);
@@ -169,7 +170,7 @@ void TSPGeneticAlgorithm<TId, TValue>::crossover() {
 }
 template<typename TId, typename TValue>
 void TSPGeneticAlgorithm<TId, TValue>::mutation() {
-#ifdef RELEASE
+#ifdef TIME
   auto start = std::chrono::high_resolution_clock::now();
 #endif
   std::uniform_int_distribution<size_t> mutationDistribution{0, graph_->getNodesSize() - 1};
@@ -191,7 +192,7 @@ void TSPGeneticAlgorithm<TId, TValue>::mutation() {
   }
   population.shrink_to_fit();
 
-#ifdef RELEASE
+#ifdef TIME
   auto elapsed = std::chrono::high_resolution_clock::now() - start;
   auto msec = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count();
   printf("Mutation time (msecs): %ld\n", msec);
@@ -207,7 +208,7 @@ void TSPGeneticAlgorithm<TId, TValue>::run(int iteration) {
   initializer();
 
   evaluate();
-#ifdef DEBUG
+#ifdef VALUES
   for (auto &chromosome : chromosomeEvals) {
     std::cout << chromosome.first << " " << chromosome.second << std::endl;
   }
@@ -215,7 +216,7 @@ void TSPGeneticAlgorithm<TId, TValue>::run(int iteration) {
 
 
   for (int i = 0; i < iteration; i++) {
-#ifdef RELEASE
+#ifdef TIME
     auto start = std::chrono::high_resolution_clock::now();
 #endif
     selectionReproduction();
@@ -226,14 +227,14 @@ void TSPGeneticAlgorithm<TId, TValue>::run(int iteration) {
     chromosomeEvals.clear();
     rankedPopulation.clear();
     evaluate();
-#ifdef RELEASE
+#ifdef TIME
     auto elapsed = std::chrono::high_resolution_clock::now() - start;
     auto msecs = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count();
     printf("Intermediate time (msecs): %ld %d\n", msecs, i);
 #endif
 
   }
-#ifdef DEBUG
+#ifdef VALUES
   for (auto &chromosome : chromosomeEvals) {
     std::cout << chromosome.first << " " << chromosome.second << std::endl;
   }
@@ -241,7 +242,7 @@ void TSPGeneticAlgorithm<TId, TValue>::run(int iteration) {
 }
 template<typename TId, typename TValue>
 void TSPGeneticAlgorithm<TId, TValue>::evaluate() {
-#ifdef RELEASE
+#ifdef TIME
   auto start = std::chrono::high_resolution_clock::now();
 #endif
 
@@ -272,7 +273,7 @@ void TSPGeneticAlgorithm<TId, TValue>::evaluate() {
     rankedPopulation.push_back(population[chromosome.first]);
   }
 
-#ifdef RELEASE
+#ifdef TIME
   auto elapsed = std::chrono::high_resolution_clock::now() - start;
   auto msec = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count();
   printf("Evaluate time (msecs): %ld\n", msec);
@@ -280,7 +281,7 @@ void TSPGeneticAlgorithm<TId, TValue>::evaluate() {
 }
 template<typename TId, typename TValue>
 void TSPGeneticAlgorithm<TId, TValue>::adjustPopulation() {
-#ifdef RELEASE
+#ifdef TIME
   auto start = std::chrono::high_resolution_clock::now();
 #endif
 
@@ -295,7 +296,7 @@ void TSPGeneticAlgorithm<TId, TValue>::adjustPopulation() {
     }
   }
 
-#ifdef RELEASE
+#ifdef TIME
   auto elapsed = std::chrono::high_resolution_clock::now() - start;
   auto msec = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count();
   printf("AdjustPopulation time (msecs): %ld\n", msec);
