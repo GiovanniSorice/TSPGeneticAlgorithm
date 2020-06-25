@@ -8,10 +8,10 @@
 #include "TSPGeneticAlgorithm.h"
 #include "undirectedGraph.h"
 template<typename TId, typename TValue>
-void TSPGeneticAlgorithm<TId, TValue>::initializer(int totalPopulation) {
-  graph_ = new undirectedGraph<TId, TValue>(20);
-  graph_->randomInit();
+void TSPGeneticAlgorithm<TId, TValue>::initializer(size_t totalPopulation) {
+  gen.seed(10);
   crossoverProbability = 0.2;
+  mutationProbability = 0.2;
   elitePercentage = 0.1;
   population.reserve(totalPopulation);
   //! Fill Population
@@ -56,7 +56,6 @@ double TSPGeneticAlgorithm<TId, TValue>::randomProbabilityGenerator() {
 template<typename TId, typename TValue>
 void TSPGeneticAlgorithm<TId, TValue>::selectionReproduction() {
   std::cout << std::endl << std::endl << std::endl;
-
   int multiplier = 2;
   double randomNumber[multiplier * chromosomeEvals.size()];
   //! Compute the avg value
@@ -86,6 +85,7 @@ void TSPGeneticAlgorithm<TId, TValue>::selectionReproduction() {
   std::sort(&randomNumber[0], &randomNumber[multiplier * chromosomeEvals.size()]);
 
   size_t chromosomeEvalsIndex = 0;
+  //! Using Stochastic universal sampling (also known as "roulette wheel selection")
   for (size_t i = 0; i < multiplier * chromosomeEvals.size();) {
     if (chromosomeEvals[chromosomeEvalsIndex].second >= randomNumber[i]) {
       intermediatePopulation.push_back(population[chromosomeEvals[chromosomeEvalsIndex].first]);
@@ -112,11 +112,13 @@ void TSPGeneticAlgorithm<TId, TValue>::crossover() {
       (intermediatePopulation.size() - 1) * crossoverProbability
       - selected) > 0; i++) {
     //! Scanning and selection algorithm 3.4 Prof. Ferragina notes of Algorithm Engineering course
-    if (unif(gen)
+    double tmp= unif(gen);
+    if (tmp
         <= ((intermediatePopulation.size() - 1) * crossoverProbability - selected)
             / (intermediatePopulation.size() - i)) {
       selected++;
-      size_t elemFirstChromosome = crossoverDistribution(rd);
+      size_t elemFirstChromosome = crossoverDistribution(gen);
+
       std::vector<TId> chromosomePop;
       chromosomePop.reserve(intermediatePopulation[i].size());
       //! Adding to the crossover chromosome the first elemFirstChromosome genes from the chromosome A
@@ -148,9 +150,44 @@ void TSPGeneticAlgorithm<TId, TValue>::crossover() {
 template<typename TId, typename TValue>
 void TSPGeneticAlgorithm<TId, TValue>::mutation() {
 
+  std::uniform_int_distribution<size_t> mutationDistribution{0, graph_->getNodesSize() - 1};
+
+  for (size_t i = 0; i < intermediatePopulation.size() - 1; i++) {
+
+    double tmp = unif(gen);
+    if (tmp <= mutationProbability) {
+
+      size_t positionGenesA = mutationDistribution(gen);
+      size_t positionGenesB = mutationDistribution(gen);
+
+      std::vector<TId> chromosomePop(intermediatePopulation[i]);
+      std::swap(chromosomePop[positionGenesA], chromosomePop[positionGenesB]);
+
+      chromosomePop.shrink_to_fit();
+      population.push_back(chromosomePop);
+    }
+  }
+  population.shrink_to_fit();
+
 }
 template<typename TId, typename TValue>
 void TSPGeneticAlgorithm<TId, TValue>::run() {
+
+  if (graph_ == nullptr) {
+    setRandomGraph(10, 20);
+  }
+  initializer(50);
+  evaluate();
+  for (int i = 0; i < 1; i++) {
+    selectionReproduction();
+    crossover();
+    mutation();
+    adjustPopulation();
+    intermediatePopulation.clear();
+    chromosomeEvals.clear();
+    rankedPopulation.clear();
+    evaluate();
+  }
 
 }
 template<typename TId, typename TValue>
@@ -174,8 +211,38 @@ void TSPGeneticAlgorithm<TId, TValue>::evaluate() {
               return chromosomeA.second < chromosomeB.second;
             });
 
+  /*
   for (auto &chromosome : chromosomeEvals) {
     std::cout << chromosome.first << " " << chromosome.second << std::endl;
   }
+*/
+  for (auto &chromosome : chromosomeEvals) {
+    rankedPopulation.push_back(population[chromosome.first]);
+  }
 
+}
+template<typename TId, typename TValue>
+void TSPGeneticAlgorithm<TId, TValue>::adjustPopulation() {
+
+  if (population.size() > rankedPopulation.size()) {
+    std::random_shuffle(population.begin(), population.end());
+    while (population.size() - rankedPopulation.size()) {
+      population.pop_back();
+    }
+  } else {
+    for (size_t i = 0; rankedPopulation.size() - population.size(); i++) {
+      population.push_back(rankedPopulation[i]);
+    }
+  }
+
+}
+template<typename TId, typename TValue>
+void TSPGeneticAlgorithm<TId, TValue>::setRandomGraph(size_t nNodes, int seed) {
+  graph_ = new undirectedGraph<TId, TValue>(nNodes);
+  graph_->randomInit(seed);
+}
+
+template<typename TId, typename TValue>
+void TSPGeneticAlgorithm<TId, TValue>::setGraph(graph<TId, TValue>* graph) {
+  graph_ = graph;
 }

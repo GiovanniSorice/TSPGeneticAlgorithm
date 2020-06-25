@@ -12,8 +12,10 @@
 template<typename TId, typename TValue>
 class TSPGeneticAlgorithm : public geneticAlgorithm {
  private:
-  graph<TId, TValue>* graph_;
+  graph<TId, TValue> *graph_;
+  //! TODO: Creare la top list dei migliori cromosomi
   //! population of chromosome
+  std::vector<std::vector<TId >> rankedPopulation;
   std::vector<std::vector<TId >> population;
   std::vector<std::vector<TId>> intermediatePopulation;
   //! random probability generator
@@ -24,17 +26,23 @@ class TSPGeneticAlgorithm : public geneticAlgorithm {
   std::vector<std::pair<size_t, double>> chromosomeEvals;
   //! Crossover probability
   double crossoverProbability;
+  //! Crossover probability
+  double mutationProbability;
   //! Elite percentage
   double elitePercentage;
-
+  int seed;
   double randomProbabilityGenerator();
+  void adjustPopulation();
+
  public:
-  void initializer(int totalPopulation) override;
+  void initializer(size_t totalPopulation) override;
   void evaluate() override;
   void selectionReproduction() override;
   void crossover() override;
   void mutation() override;
   void run() override;
+  void setGraph(graph<TId, TValue>* graph);
+  void setRandomGraph(size_t nNodes, int seed=0);
 
 };
 

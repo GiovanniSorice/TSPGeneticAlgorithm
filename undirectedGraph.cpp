@@ -28,10 +28,13 @@ undirectedGraph<TId, TValue>::undirectedGraph(std::vector<TId> nodes_,
 /** Random initialization of the edges
  */
 template<typename TId, typename TValue>
-void undirectedGraph<TId, TValue>::randomInit() {
+void undirectedGraph<TId, TValue>::randomInit(int seed) {
   //edgeType<TId, TValue> tmpEdges(this->nodes.size());
-  std::random_device rd;
-  std::mt19937 gen(rd());
+    std::random_device rd;
+    std::mt19937 gen(rd());
+  if (seed) {
+    gen.seed(seed);
+  }
   std::uniform_real_distribution<double> unif(0, 100);
   this->edges.clear();
   for (size_t i = 0; i < this->nodes.size(); i++) {

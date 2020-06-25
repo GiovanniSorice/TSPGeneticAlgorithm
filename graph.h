@@ -13,7 +13,7 @@ class graph {
  public:
   virtual ~graph() = default;
   explicit graph() = default;
-  virtual void randomInit() = 0;
+  virtual void randomInit(int seed) = 0;
   virtual TValue getValueEdge(TId keyFrom, TId keyTo) = 0;
   explicit graph(unsigned long long nNode) : nodes(nNode) {};
   inline explicit graph(std::vector<TId> nodes_) {
@@ -33,4 +33,12 @@ class graph {
   }
 
 };
+
+template
+class graph<int, int>;
+template
+class graph<int, double>;
+template
+class graph<unsigned long long, double>;
+
 #endif //TSPGENETICALGORITHM__GRAPH_H_

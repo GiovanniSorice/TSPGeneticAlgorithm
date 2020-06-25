@@ -21,7 +21,7 @@ class undirectedGraph : public graph<TId, TValue> {
   explicit undirectedGraph(unsigned long long nNode);
   explicit undirectedGraph(std::vector<TId> nodes_);
   explicit undirectedGraph(std::vector<TId> nodes_, edgeType<TId, TValue> edges_);
-  void randomInit() override;
+  void randomInit(int seed = 0) override;
   TValue getValueEdge(TId keyFrom, TId keyTo) override;
 };
 
