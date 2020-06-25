@@ -7,12 +7,12 @@
 
 class geneticAlgorithm {
  public:
-  virtual void initializer(size_t totalPopulation) = 0;
+  virtual void initializer() = 0;
   virtual void evaluate() = 0;
   virtual void selectionReproduction() = 0;
   virtual void crossover() = 0;
   virtual void mutation() = 0;
-  virtual void run() = 0;
+  virtual void run(int iteration) = 0;
 
 };
 

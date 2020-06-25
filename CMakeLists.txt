@@ -17,12 +17,12 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3") # To view vectorization -ftree-vectorize -fop
 set(CMAKE_CXX_STANDARD 17)
 
 add_library(TSPGeneticAlgorithm
-            geneticAlgorithm.h
-            TSPGeneticAlgorithm.cpp
-            TSPGeneticAlgorithm.h
-            undirectedGraph.cpp
-            undirectedGraph.h
-            graph.h)
+        src/geneticAlgorithm/geneticAlgorithm.h
+        src/geneticAlgorithm/TSPGeneticAlgorithm.cpp
+        src/geneticAlgorithm/TSPGeneticAlgorithm.h
+        src/graph/undirectedGraph.cpp
+        src/graph/undirectedGraph.h
+        src/graph/graph.h src/geneticAlgorithm/TSPGeneticAlgorithmOMP.cpp src/geneticAlgorithm/TSPGeneticAlgorithmOMP.h)
 
 target_link_libraries(TSPGeneticAlgorithm
         Threads::Threads

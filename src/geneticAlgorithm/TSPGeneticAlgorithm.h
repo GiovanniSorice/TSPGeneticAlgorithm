@@ -4,7 +4,7 @@
 
 #ifndef TSPGENETICALGORITHM__TSPGENETICALGORITHM_H_
 #define TSPGENETICALGORITHM__TSPGENETICALGORITHM_H_
-#include "graph.h"
+#include "../graph/graph.h"
 #include <unordered_map>
 #include <vector>
 #include <random>
@@ -15,34 +15,41 @@ class TSPGeneticAlgorithm : public geneticAlgorithm {
   graph<TId, TValue> *graph_;
   //! TODO: Creare la top list dei migliori cromosomi
   //! population of chromosome
-  std::vector<std::vector<TId >> rankedPopulation;
   std::vector<std::vector<TId >> population;
+  std::vector<std::vector<TId >> rankedPopulation;
   std::vector<std::vector<TId>> intermediatePopulation;
+  //! Chromosome current value
+  std::vector<std::pair<size_t, double>> chromosomeEvals;
   //! random probability generator
   std::random_device rd;
   std::mt19937 gen{rd()};
   std::uniform_real_distribution<double> unif{0, 1};
-  //! Chromosome current value
-  std::vector<std::pair<size_t, double>> chromosomeEvals;
+  int seed;
   //! Crossover probability
   double crossoverProbability;
   //! Crossover probability
   double mutationProbability;
-  //! Elite percentage
-  double elitePercentage;
-  int seed;
+  int multiplier;
+  size_t totalPopulation;
   double randomProbabilityGenerator();
   void adjustPopulation();
 
  public:
-  void initializer(size_t totalPopulation) override;
+  explicit TSPGeneticAlgorithm();
+  explicit TSPGeneticAlgorithm(int seed_);
+  explicit TSPGeneticAlgorithm(int seed_, double crossoverProbability_, double mutationProbability_);
+  void initializer() override;
   void evaluate() override;
   void selectionReproduction() override;
   void crossover() override;
   void mutation() override;
-  void run() override;
+  void run(int iteration) override;
   void setGraph(graph<TId, TValue>* graph);
-  void setRandomGraph(size_t nNodes, int seed=0);
+  void setRandomGraph(size_t nNodes);
+  void SetCrossoverProbability(double crossover_probability);
+  void SetMutationProbability(double mutation_probability);
+  void SetMultiplier(int multiplier);
+  void SetTotalPopulation(size_t total_population);
 
 };
 
