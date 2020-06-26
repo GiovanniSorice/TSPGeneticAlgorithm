@@ -69,7 +69,7 @@ void TSPGeneticAlgorithm<TId, TValue>::selectionReproduction() {
 
 
   //std::cout << std::endl << std::endl << std::endl;
-  double randomNumber[multiplier * chromosomeEvals.size()];
+  std::vector<double> randomNumber(multiplier * chromosomeEvals.size());
   //! Compute the avg value
   double avg = 0;
   for (auto chromosomeValue: chromosomeEvals) {
@@ -295,6 +295,7 @@ void TSPGeneticAlgorithm<TId, TValue>::evaluate() {
   for (auto &chromosome : chromosomeEvals) {
     rankedPopulation.push_back(population[chromosome.first]);
   }
+
 
 #ifdef TIME
   auto elapsed = std::chrono::high_resolution_clock::now() - start;

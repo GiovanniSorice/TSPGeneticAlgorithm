@@ -73,7 +73,7 @@ void TSPGeneticAlgorithmST<TId, TValue>::selectionReproduction() {
 
 
   //std::cout << std::endl << std::endl << std::endl;
-  double randomNumber[multiplier * chromosomeEvals.size()];
+  std::vector<double> randomNumber(multiplier * chromosomeEvals.size());
   //! Compute the avg value
   double avg = 0;
   for (auto chromosomeValue: chromosomeEvals) {
@@ -144,8 +144,9 @@ void TSPGeneticAlgorithmST<TId, TValue>::crossover() {
 
   std::random_shuffle(intermediatePopulation.begin(), intermediatePopulation.end());
 
-  //! Selection of the chromosome used for the crossover
-  std::uniform_int_distribution<size_t> SelectionCrossoverDistribution{0, intermediatePopulation.size() - 1};
+  //! Selection of the chromosome used for the crossover (intermediatePopulation.size() - 2 because i exchange the value between i and i+1,
+  //! so if i use only intermediatePopulation.size() - 1 the index will go out of bound and create some error)
+  std::uniform_int_distribution<size_t> SelectionCrossoverDistribution{0, intermediatePopulation.size() - 2};
 
 
   std::vector<size_t> crossoverPosition(totalCrossover);
@@ -178,32 +179,28 @@ void TSPGeneticAlgorithmST<TId, TValue>::crossover() {
         std::vector<TId> chromosomePop(&intermediatePopulation[crossoverPosition[i]][elemFirstChromosomeIndexA],
                                        &intermediatePopulation[crossoverPosition[i]][elemFirstChromosomeIndexB]);
 
+        auto interPopPtrBeginA= &intermediatePopulation[crossoverPosition[i]][0];
+        auto interPopPtrEndA = &intermediatePopulation[crossoverPosition[i]][elemFirstChromosomeIndexA];
 
-        std::vector<TId> currentMissingIdA(&intermediatePopulation[crossoverPosition[i]][0],
-                                           &intermediatePopulation[crossoverPosition[i]][elemFirstChromosomeIndexA]);
+        auto interPopPtrBeginB = &intermediatePopulation[crossoverPosition[i]][elemFirstChromosomeIndexB];
+        auto interPopPtrEndB = &intermediatePopulation[crossoverPosition[i]][intermediatePopulation[crossoverPosition[i]].size()];
 
-        std::vector<TId> currentMissingIdB(&intermediatePopulation[crossoverPosition[i]][elemFirstChromosomeIndexB],
-                                           &intermediatePopulation[crossoverPosition[i]][intermediatePopulation[crossoverPosition[i]].size()]);
         //! Adding to the crossover chromosome the remaining (chromosome.size() - elemFirstChromosome + 1) genes with
         //! the order that they appear in chromosome B
         for (size_t j = 0; j < intermediatePopulation[crossoverPosition[i] + 1].size() /*&& currentMissingId.size()*/;
              j++) {
-          auto itA = std::find(currentMissingIdA.begin(),
-                               currentMissingIdA.end(),
+          auto itA = std::find(interPopPtrBeginA,
+                               interPopPtrEndA,
                                intermediatePopulation[crossoverPosition[i] + 1][j]);
-          auto itB = std::find(currentMissingIdB.begin(),
-                               currentMissingIdB.end(),
+          auto itB = std::find(interPopPtrBeginB,
+                               interPopPtrEndB,
                                intermediatePopulation[crossoverPosition[i] + 1][j]);
 
-          if (itA != currentMissingIdA.end() || itB != currentMissingIdB.end()) {
-            if (itA != currentMissingIdA.end()) {
+          if (itA != interPopPtrEndA || itB != interPopPtrEndB) {
+            if (itA != interPopPtrEndA) {
               chromosomePop.push_back(*itA);
-              //! Possibile miglioria quando si usano molti nodi
-              currentMissingIdA.erase(itA);
             } else {
               chromosomePop.push_back(*itB);
-              //! Possibile miglioria quando si usano molti nodi
-              currentMissingIdB.erase(itB);
             }
           }
         }
@@ -306,6 +303,8 @@ void TSPGeneticAlgorithmST<TId, TValue>::evaluate() {
 #ifdef TIME
   auto start = std::chrono::high_resolution_clock::now();
 #endif
+
+
   chromosomeEvals.resize(population.size());
   std::vector<std::pair<size_t, size_t>> ranges;
   size_t startRange = 0;
@@ -366,6 +365,7 @@ void TSPGeneticAlgorithmST<TId, TValue>::evaluate() {
     rankedPopulation.push_back(population[chromosome.first]);
   }
   rankedPopulation.shrink_to_fit();
+
 #ifdef TIME
   auto elapsed = std::chrono::high_resolution_clock::now() - start;
   auto msec = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count();
