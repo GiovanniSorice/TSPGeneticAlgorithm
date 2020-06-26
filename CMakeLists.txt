@@ -12,7 +12,7 @@ endif ()
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 
 set(CMAKE_CXX_FLAGS_DEBUG "-Wall -Wextra -O0 -fstack-check -fstack-protector-strong -fno-omit-frame-pointer -g -DDEBUG")
-set(CMAKE_CXX_FLAGS_RELEASE "-O3  -ftree-vectorize -pthread -ltbb") # To view vectorization -ftree-vectorize -fopt-info-vec
+set(CMAKE_CXX_FLAGS_RELEASE "-O3  -ftree-vectorize -pthread") # To view vectorization -ftree-vectorize -fopt-info-vec use -missed -note -all
 
 set(CMAKE_CXX_STANDARD 17)
 
@@ -22,7 +22,11 @@ add_library(TSPGeneticAlgorithm
         src/geneticAlgorithm/TSPGeneticAlgorithm.h
         src/graph/undirectedGraph.cpp
         src/graph/undirectedGraph.h
-        src/graph/graph.h src/geneticAlgorithm/TSPGeneticAlgorithmOMP.cpp src/geneticAlgorithm/TSPGeneticAlgorithmOMP.h)
+        src/graph/graph.h
+        src/geneticAlgorithm/TSPGeneticAlgorithmOMP.cpp
+        src/geneticAlgorithm/TSPGeneticAlgorithmOMP.h
+        src/geneticAlgorithm/TSPGeneticAlgorithmST.cpp
+        src/geneticAlgorithm/TSPGeneticAlgorithmST.h)
 
 target_link_libraries(TSPGeneticAlgorithm
         Threads::Threads

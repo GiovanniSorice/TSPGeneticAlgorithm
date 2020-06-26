@@ -1,16 +1,19 @@
 //
-// Created by gs1010 on 25/06/20.
+// Created by gs1010 on 26/06/20.
 //
-#define TIME
 
-#include "TSPGeneticAlgorithmOMP.h"
+#include "TSPGeneticAlgorithmST.h"
 #include <random>
 #include <iostream>
 #include <algorithm>
 #include <chrono>
+#include <deque>
+#include <thread>
 #include "../graph/undirectedGraph.h"
+#define TIME
+
 template<typename TId, typename TValue>
-void TSPGeneticAlgorithmOMP<TId, TValue>::initializer() {
+void TSPGeneticAlgorithmST<TId, TValue>::initializer() {
 #ifdef TIME
   auto start = std::chrono::high_resolution_clock::now();
 #endif
@@ -20,14 +23,13 @@ void TSPGeneticAlgorithmOMP<TId, TValue>::initializer() {
   for (size_t i = 0; i < totalPopulation; i++) {
     std::vector<std::pair<TId, double>> chromosome_prob;
 
-#pragma omp parallel for num_threads(nworker)
     for (auto &node : graph_->getNodes()) {
       chromosome_prob.push_back(std::make_pair(node, randomProbabilityGenerator()));
     }
 
     //! sort genes in each chromosome
     //TODO: aggiungere specifica se par o seq per funzioni libreria std
-    std::sort( chromosome_prob.begin(),
+    std::sort(chromosome_prob.begin(),
               chromosome_prob.end(),
               [&](const std::pair<TId, double> &geneA, const std::pair<TId, double> &geneB) {
                 return geneA.second < geneB.second;
@@ -60,11 +62,11 @@ for (std::vector<TId>& chromosome : population) {
 */
 }
 template<typename TId, typename TValue>
-double TSPGeneticAlgorithmOMP<TId, TValue>::randomProbabilityGenerator() {
+double TSPGeneticAlgorithmST<TId, TValue>::randomProbabilityGenerator() {
   return unif(gen);
 }
 template<typename TId, typename TValue>
-void TSPGeneticAlgorithmOMP<TId, TValue>::selectionReproduction() {
+void TSPGeneticAlgorithmST<TId, TValue>::selectionReproduction() {
 #ifdef TIME
   auto start = std::chrono::high_resolution_clock::now();
 #endif
@@ -115,7 +117,7 @@ void TSPGeneticAlgorithmOMP<TId, TValue>::selectionReproduction() {
 #endif
 }
 template<typename TId, typename TValue>
-void TSPGeneticAlgorithmOMP<TId, TValue>::crossover() {
+void TSPGeneticAlgorithmST<TId, TValue>::crossover() {
 #ifdef TIME
   auto start = std::chrono::high_resolution_clock::now();
 #endif
@@ -191,7 +193,7 @@ void TSPGeneticAlgorithmOMP<TId, TValue>::crossover() {
 #endif
 }
 template<typename TId, typename TValue>
-void TSPGeneticAlgorithmOMP<TId, TValue>::mutation() {
+void TSPGeneticAlgorithmST<TId, TValue>::mutation() {
 #ifdef TIME
   auto start = std::chrono::high_resolution_clock::now();
 #endif
@@ -221,7 +223,7 @@ void TSPGeneticAlgorithmOMP<TId, TValue>::mutation() {
 #endif
 }
 template<typename TId, typename TValue>
-void TSPGeneticAlgorithmOMP<TId, TValue>::run(int iteration) {
+void TSPGeneticAlgorithmST<TId, TValue>::run(int iteration) {
 
   if (graph_ == nullptr) {
     setRandomGraph(500);
@@ -262,21 +264,58 @@ void TSPGeneticAlgorithmOMP<TId, TValue>::run(int iteration) {
 #endif
 }
 template<typename TId, typename TValue>
-void TSPGeneticAlgorithmOMP<TId, TValue>::evaluate() {
+void TSPGeneticAlgorithmST<TId, TValue>::evaluate() {
 #ifdef TIME
   auto start = std::chrono::high_resolution_clock::now();
 #endif
 
   size_t currentChromosomeIndex = 0;
-  for (std::vector<TId> &chromosome : population) {
-    double eval = 0;
-    for (size_t i = 0; i < chromosome.size() - 1; i++) {
-      eval += graph_->getValueEdge(chromosome[i], chromosome[i + 1]);
-    }
-    eval += graph_->getValueEdge(chromosome[chromosome.size() - 1], chromosome[0]);
-    chromosomeEvals.push_back(std::make_pair(currentChromosomeIndex, eval / chromosome.size()));
-    currentChromosomeIndex++;
+  std::vector<std::pair<size_t, size_t>> ranges;
+  size_t startRange = 0;
+  size_t step = population.size() / nWorker;
+  size_t remaining = population.size() - step * nWorker;
+  size_t endRange = 0;
+
+  while (remaining != 0) {
+    startRange = endRange;
+    endRange += step + 1;
+    ranges.emplace_back(startRange, endRange);
+    remaining--;
   }
+
+  while (endRange < population.size()) {
+    startRange = endRange;
+    endRange += step;
+    ranges.emplace_back(startRange, endRange);
+  }
+
+  std::deque<std::thread> coda;
+  std::vector<std::vector<std::pair<size_t, double>>> chromosomeEvalsPar(ranges.size());
+
+  for (size_t i=0; i < ranges.size(); i++) {
+    coda.emplace_back(std::thread([&](size_t index) {
+      for (size_t j = ranges[index].first; j < ranges[index].second; j++) {
+        std::vector<TId> &chromosome = population[j];
+        double eval = 0;
+        for (size_t k = 0; k < chromosome.size() - 1; k++) {
+          eval += graph_->getValueEdge(chromosome[k], chromosome[k + 1]);
+        }
+        eval += graph_->getValueEdge(chromosome[chromosome.size() - 1], chromosome[0]);
+        chromosomeEvalsPar[index].push_back(std::make_pair(j, eval / chromosome.size()));
+      }
+    }, i));
+  }
+
+  for (auto &it : coda) {
+    if (it.joinable())
+      it.join();
+  }
+
+  for (auto &chromosomeEval : chromosomeEvalsPar) {
+    chromosomeEvals.insert(chromosomeEvals.end(), chromosomeEval.begin(), chromosomeEval.end());
+  }
+
+  coda.clear();
 
   //TODO: aggiungere specifica se par o seq per funzioni libreria std
   std::sort(chromosomeEvals.begin(),
@@ -301,7 +340,7 @@ void TSPGeneticAlgorithmOMP<TId, TValue>::evaluate() {
 #endif
 }
 template<typename TId, typename TValue>
-void TSPGeneticAlgorithmOMP<TId, TValue>::adjustPopulation() {
+void TSPGeneticAlgorithmST<TId, TValue>::adjustPopulation() {
 #ifdef TIME
   auto start = std::chrono::high_resolution_clock::now();
 #endif
@@ -325,31 +364,31 @@ void TSPGeneticAlgorithmOMP<TId, TValue>::adjustPopulation() {
 
 }
 template<typename TId, typename TValue>
-void TSPGeneticAlgorithmOMP<TId, TValue>::setRandomGraph(size_t nNodes) {
+void TSPGeneticAlgorithmST<TId, TValue>::setRandomGraph(size_t nNodes) {
   graph_ = new undirectedGraph<TId, TValue>(nNodes);
   graph_->randomInit(seed);
 }
 
 template<typename TId, typename TValue>
-void TSPGeneticAlgorithmOMP<TId, TValue>::setGraph(graph<TId, TValue> *graph) {
+void TSPGeneticAlgorithmST<TId, TValue>::setGraph(graph<TId, TValue> *graph) {
   graph_ = graph;
 }
 template<typename TId, typename TValue>
-TSPGeneticAlgorithmOMP<TId, TValue>::TSPGeneticAlgorithmOMP():seed(0), multiplier(1), totalPopulation(500), nWorker(1) {
+TSPGeneticAlgorithmST<TId, TValue>::TSPGeneticAlgorithmST():seed(0), multiplier(1), totalPopulation(500), nWorker(1) {
   crossoverProbability = unif(gen);
   mutationProbability = unif(gen);
 }
 template<typename TId, typename TValue>
-TSPGeneticAlgorithmOMP<TId, TValue>::TSPGeneticAlgorithmOMP(int seed_):seed(seed_), multiplier(1), totalPopulation(500),
-                                                                       nWorker(1) {
+TSPGeneticAlgorithmST<TId, TValue>::TSPGeneticAlgorithmST(int seed_):seed(seed_), multiplier(1), totalPopulation(500),
+                                                                     nWorker(1) {
   gen.seed(seed);
   crossoverProbability = unif(gen);
   mutationProbability = unif(gen);
 }
 template<typename TId, typename TValue>
-TSPGeneticAlgorithmOMP<TId, TValue>::TSPGeneticAlgorithmOMP(int seed_,
-                                                            double crossoverProbability_,
-                                                            double mutationProbability_)
+TSPGeneticAlgorithmST<TId, TValue>::TSPGeneticAlgorithmST(int seed_,
+                                                          double crossoverProbability_,
+                                                          double mutationProbability_)
     :seed(seed_),
      crossoverProbability(crossoverProbability_),
      mutationProbability(mutationProbability_),
@@ -359,22 +398,22 @@ TSPGeneticAlgorithmOMP<TId, TValue>::TSPGeneticAlgorithmOMP(int seed_,
   gen.seed(seed);
 }
 template<typename TId, typename TValue>
-void TSPGeneticAlgorithmOMP<TId, TValue>::SetCrossoverProbability(double crossover_probability) {
+void TSPGeneticAlgorithmST<TId, TValue>::SetCrossoverProbability(double crossover_probability) {
   crossoverProbability = crossover_probability;
 }
 template<typename TId, typename TValue>
-void TSPGeneticAlgorithmOMP<TId, TValue>::SetMutationProbability(double mutation_probability) {
+void TSPGeneticAlgorithmST<TId, TValue>::SetMutationProbability(double mutation_probability) {
   mutationProbability = mutation_probability;
 }
 template<typename TId, typename TValue>
-void TSPGeneticAlgorithmOMP<TId, TValue>::SetMultiplier(int multiplier) {
-  TSPGeneticAlgorithmOMP::multiplier = multiplier;
+void TSPGeneticAlgorithmST<TId, TValue>::SetMultiplier(int multiplier) {
+  TSPGeneticAlgorithmST::multiplier = multiplier;
 }
 template<typename TId, typename TValue>
-void TSPGeneticAlgorithmOMP<TId, TValue>::SetTotalPopulation(size_t total_population) {
+void TSPGeneticAlgorithmST<TId, TValue>::SetTotalPopulation(size_t total_population) {
   totalPopulation = total_population;
 }
 template<typename TId, typename TValue>
-void TSPGeneticAlgorithmOMP<TId, TValue>::SetNWorker(int n_worker) {
+void TSPGeneticAlgorithmST<TId, TValue>::SetNWorker(int n_worker) {
   nWorker = n_worker;
 }
