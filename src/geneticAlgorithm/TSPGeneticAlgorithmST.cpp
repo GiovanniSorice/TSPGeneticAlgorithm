@@ -45,7 +45,7 @@ void TSPGeneticAlgorithmST<TId, TValue>::initializer() {
   }
   population.shrink_to_fit();
 
-#ifdef RELEASE
+#ifdef TIME
   auto elapsed = std::chrono::high_resolution_clock::now() - start;
   auto msec = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count();
   printf("Initializer time (msecs): %ld\n", msec);
@@ -102,7 +102,7 @@ void TSPGeneticAlgorithmST<TId, TValue>::selectionReproduction() {
   //! Using Stochastic universal sampling (also known as "roulette wheel selection")
   for (size_t i = 0; i < multiplier * chromosomeEvals.size();) {
     if (chromosomeEvals[chromosomeEvalsIndex].second >= randomNumber[i]) {
-      intermediatePopulation.push_back(population[chromosomeEvals[chromosomeEvalsIndex].first]);
+      intermediatePopulation.emplace_back(population[chromosomeEvals[chromosomeEvalsIndex].first]);
       //std::cout << chromosomeEvals[chromosomeEvalsIndex].first << std::endl;
       i++;
     } else {
@@ -122,68 +122,106 @@ void TSPGeneticAlgorithmST<TId, TValue>::crossover() {
   auto start = std::chrono::high_resolution_clock::now();
 #endif
 
+  size_t totalCrossover = intermediatePopulation.size() * crossoverProbability;
+  std::vector<std::pair<size_t, size_t>> ranges;
+  size_t startRange = 0;
+  size_t step = totalCrossover / nWorker;
+  size_t remaining = totalCrossover - step * nWorker;
+  size_t endRange = 0;
+
+  while (remaining != 0) {
+    startRange = endRange;
+    endRange += step + 1;
+    ranges.emplace_back(startRange, endRange);
+    remaining--;
+  }
+
+  while (endRange < totalCrossover) {
+    startRange = endRange;
+    endRange += step;
+    ranges.emplace_back(startRange, endRange);
+  }
+
   std::random_shuffle(intermediatePopulation.begin(), intermediatePopulation.end());
-  // Possibile scegliere prima le coppie che dovranno essere usate nella fase di crossover, inserirle in un array secondario e modificarle in modo da
-  // usare la vectorization
+
+  //! Selection of the chromosome used for the crossover
+  std::uniform_int_distribution<size_t> SelectionCrossoverDistribution{0, intermediatePopulation.size() - 1};
+
+
+  std::vector<size_t> crossoverPosition(totalCrossover);
+
+  for (size_t i = 0; i < totalCrossover; i++) {
+    crossoverPosition[i] = SelectionCrossoverDistribution(gen);
+  }
+
+
   std::uniform_int_distribution<size_t> crossoverDistribution{0, graph_->getNodesSize()};
   population.clear();
-  size_t selected = 0;
-  for (size_t i = 0; (i < intermediatePopulation.size() - 1) && (
-      (intermediatePopulation.size() - 1) * crossoverProbability
-          - selected) > 0; i++) {
-    //! Scanning and selection algorithm 3.4 Prof. Ferragina notes of Algorithm Engineering course
-    if (unif(gen)
-        <= ((intermediatePopulation.size() - 1) * crossoverProbability - selected)
-            / (intermediatePopulation.size() - i)) {
-      selected++;
-      size_t elemFirstChromosomeIndexA = crossoverDistribution(gen);
-      size_t elemFirstChromosomeIndexB = crossoverDistribution(gen);
+  // TODO: cambiare con population.resize(totalPopulation)
+  population.resize(totalCrossover);
 
-      if (elemFirstChromosomeIndexA > elemFirstChromosomeIndexB) {
-        std::swap(elemFirstChromosomeIndexA, elemFirstChromosomeIndexB);
-      }
+  std::deque<std::thread> coda;
+  for (auto & range : ranges) {
 
-      //! Adding to the crossover chromosome the first elemFirstChromosome genes from the chromosome A
-      std::vector<TId> chromosomePop(&intermediatePopulation[i][elemFirstChromosomeIndexA],
-                                     &intermediatePopulation[i][elemFirstChromosomeIndexB]);
+    coda.emplace_back(std::thread([&](size_t start, size_t end) {
 
-/*
-      for (size_t j = 0; j < elemFirstChromosome; j++) {
-        chromosomePop.push_back(intermediatePopulation[i][j]);
-      }
-*/
-      std::vector<TId> currentMissingIdA(&intermediatePopulation[i][0],
-                                         &intermediatePopulation[i][elemFirstChromosomeIndexA]);
+      for (size_t i = start; i < end; i++) {
 
-      std::vector<TId> currentMissingIdB(&intermediatePopulation[i][elemFirstChromosomeIndexB],
-                                         &intermediatePopulation[i][intermediatePopulation[i].size()]);
-      //! Adding to the crossover chromosome the remaining (chromosome.size() - elemFirstChromosome + 1) genes with
-      //! the order that they appear in chromosome B
-      for (size_t j = 0; j < intermediatePopulation[i + 1].size() /*&& currentMissingId.size()*/; j++) {
-        auto itA = std::find(currentMissingIdA.begin(),
-                             currentMissingIdA.end(),
-                             intermediatePopulation[i + 1][j]);
-        auto itB = std::find(currentMissingIdB.begin(),
-                             currentMissingIdB.end(),
-                             intermediatePopulation[i + 1][j]);
+        size_t elemFirstChromosomeIndexA = crossoverDistribution(gen);
+        size_t elemFirstChromosomeIndexB = crossoverDistribution(gen);
 
-        if (itA != currentMissingIdA.end() || itB != currentMissingIdB.end()) {
-          if (itA != currentMissingIdA.end()) {
-            chromosomePop.push_back(*itA);
-            //! Possibile miglioria quando si usano molti nodi
-            currentMissingIdA.erase(itA);
-          } else {
-            chromosomePop.push_back(*itB);
-            //! Possibile miglioria quando si usano molti nodi
-            currentMissingIdB.erase(itB);
+        if (elemFirstChromosomeIndexA > elemFirstChromosomeIndexB) {
+          std::swap(elemFirstChromosomeIndexA, elemFirstChromosomeIndexB);
+        }
+
+        //! Adding to the crossover chromosome the first elemFirstChromosome genes from the chromosome A
+        std::vector<TId> chromosomePop(&intermediatePopulation[crossoverPosition[i]][elemFirstChromosomeIndexA],
+                                       &intermediatePopulation[crossoverPosition[i]][elemFirstChromosomeIndexB]);
+
+
+        std::vector<TId> currentMissingIdA(&intermediatePopulation[crossoverPosition[i]][0],
+                                           &intermediatePopulation[crossoverPosition[i]][elemFirstChromosomeIndexA]);
+
+        std::vector<TId> currentMissingIdB(&intermediatePopulation[crossoverPosition[i]][elemFirstChromosomeIndexB],
+                                           &intermediatePopulation[crossoverPosition[i]][intermediatePopulation[crossoverPosition[i]].size()]);
+        //! Adding to the crossover chromosome the remaining (chromosome.size() - elemFirstChromosome + 1) genes with
+        //! the order that they appear in chromosome B
+        for (size_t j = 0; j < intermediatePopulation[crossoverPosition[i] + 1].size() /*&& currentMissingId.size()*/;
+             j++) {
+          auto itA = std::find(currentMissingIdA.begin(),
+                               currentMissingIdA.end(),
+                               intermediatePopulation[crossoverPosition[i] + 1][j]);
+          auto itB = std::find(currentMissingIdB.begin(),
+                               currentMissingIdB.end(),
+                               intermediatePopulation[crossoverPosition[i] + 1][j]);
+
+          if (itA != currentMissingIdA.end() || itB != currentMissingIdB.end()) {
+            if (itA != currentMissingIdA.end()) {
+              chromosomePop.push_back(*itA);
+              //! Possibile miglioria quando si usano molti nodi
+              currentMissingIdA.erase(itA);
+            } else {
+              chromosomePop.push_back(*itB);
+              //! Possibile miglioria quando si usano molti nodi
+              currentMissingIdB.erase(itB);
+            }
           }
         }
-      }
 
-      chromosomePop.shrink_to_fit();
-      population.push_back(chromosomePop);
-    }
+        chromosomePop.shrink_to_fit();
+        population[i] = chromosomePop;
+      }
+    }, range.first, range.second));
   }
+
+
+  for (auto &it : coda) {
+    if (it.joinable())
+      it.join();
+  }
+
+  coda.clear();
+
   population.shrink_to_fit();
 
 #ifdef TIME
@@ -310,7 +348,7 @@ void TSPGeneticAlgorithmST<TId, TValue>::evaluate() {
   }
 
   coda.clear();
-
+  chromosomeEvals.shrink_to_fit();
   //TODO: aggiungere specifica se par o seq per funzioni libreria std
   std::sort(chromosomeEvals.begin(),
             chromosomeEvals.end(),
@@ -323,16 +361,18 @@ void TSPGeneticAlgorithmST<TId, TValue>::evaluate() {
     std::cout << chromosome.first << " " << chromosome.second << std::endl;
   }
 */
+  rankedPopulation.reserve(chromosomeEvals.size());
   for (auto &chromosome : chromosomeEvals) {
     rankedPopulation.push_back(population[chromosome.first]);
   }
-
+  rankedPopulation.shrink_to_fit();
 #ifdef TIME
   auto elapsed = std::chrono::high_resolution_clock::now() - start;
   auto msec = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count();
   printf("Evaluate time (msecs): %ld\n", msec);
 #endif
 }
+
 template<typename TId, typename TValue>
 void TSPGeneticAlgorithmST<TId, TValue>::adjustPopulation() {
 #ifdef TIME

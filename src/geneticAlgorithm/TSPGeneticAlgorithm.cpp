@@ -41,7 +41,7 @@ void TSPGeneticAlgorithm<TId, TValue>::initializer() {
   }
   population.shrink_to_fit();
 
-#ifdef RELEASE
+#ifdef TIME
   auto elapsed = std::chrono::high_resolution_clock::now() - start;
   auto msec = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count();
   printf("Initializer time (msecs): %ld\n", msec);
