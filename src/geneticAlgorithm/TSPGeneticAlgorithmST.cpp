@@ -268,8 +268,7 @@ void TSPGeneticAlgorithmST<TId, TValue>::evaluate() {
 #ifdef TIME
   auto start = std::chrono::high_resolution_clock::now();
 #endif
-
-  size_t currentChromosomeIndex = 0;
+  chromosomeEvals.resize(population.size());
   std::vector<std::pair<size_t, size_t>> ranges;
   size_t startRange = 0;
   size_t step = population.size() / nWorker;
@@ -290,7 +289,6 @@ void TSPGeneticAlgorithmST<TId, TValue>::evaluate() {
   }
 
   std::deque<std::thread> coda;
-  std::vector<std::vector<std::pair<size_t, double>>> chromosomeEvalsPar(ranges.size());
 
   for (size_t i=0; i < ranges.size(); i++) {
     coda.emplace_back(std::thread([&](size_t index) {
@@ -301,7 +299,7 @@ void TSPGeneticAlgorithmST<TId, TValue>::evaluate() {
           eval += graph_->getValueEdge(chromosome[k], chromosome[k + 1]);
         }
         eval += graph_->getValueEdge(chromosome[chromosome.size() - 1], chromosome[0]);
-        chromosomeEvalsPar[index].push_back(std::make_pair(j, eval / chromosome.size()));
+        chromosomeEvals[j]=std::make_pair(j, eval / chromosome.size());
       }
     }, i));
   }
@@ -309,10 +307,6 @@ void TSPGeneticAlgorithmST<TId, TValue>::evaluate() {
   for (auto &it : coda) {
     if (it.joinable())
       it.join();
-  }
-
-  for (auto &chromosomeEval : chromosomeEvalsPar) {
-    chromosomeEvals.insert(chromosomeEvals.end(), chromosomeEval.begin(), chromosomeEval.end());
   }
 
   coda.clear();
