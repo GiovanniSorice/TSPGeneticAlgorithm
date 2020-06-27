@@ -20,31 +20,12 @@ void TSPGeneticAlgorithmST<TId, TValue>::initializer() {
   auto start = std::chrono::high_resolution_clock::now();
 #endif
 
-  std::vector<std::pair<size_t, size_t>> ranges;
-  size_t startRange = 0;
-  size_t step = totalPopulation / nWorker;
-  size_t remaining = totalPopulation - step * nWorker;
-  size_t endRange = 0;
-
-  while (remaining != 0) {
-    startRange = endRange;
-    endRange += step + 1;
-    ranges.emplace_back(startRange, endRange);
-    remaining--;
-  }
-
-  while (endRange < totalPopulation) {
-    startRange = endRange;
-    endRange += step;
-    ranges.emplace_back(startRange, endRange);
-  }
-
   std::deque<std::thread> coda;
 
   population.resize(totalPopulation);
 
   //! Fill Population
-  for (auto range : ranges) {
+  for (auto range : populationRanges) {
     coda.emplace_back(std::thread([&](size_t start, size_t end) {
       for (size_t i = start; i < end; i++) {
         std::vector<std::pair<TId, double>> chromosome_prob;
@@ -276,8 +257,7 @@ void TSPGeneticAlgorithmST<TId, TValue>::mutation() {
 
   for (size_t i = 0; i < intermediatePopulation.size() - 1; i++) {
 
-    double tmp = unif(gen);
-    if (tmp <= mutationProbability) {
+    if (unif(gen) <= mutationProbability) {
 
       size_t positionGenesA = mutationDistribution(gen);
       size_t positionGenesB = mutationDistribution(gen);
@@ -303,7 +283,7 @@ void TSPGeneticAlgorithmST<TId, TValue>::run(int iteration) {
   if (graph_ == nullptr) {
     setRandomGraph(500);
   }
-
+  setUpRanges();
   initializer();
 
   evaluate();
@@ -344,41 +324,22 @@ void TSPGeneticAlgorithmST<TId, TValue>::evaluate() {
   auto start = std::chrono::high_resolution_clock::now();
 #endif
 
-
   chromosomeEvals.resize(population.size());
-  std::vector<std::pair<size_t, size_t>> ranges;
-  size_t startRange = 0;
-  size_t step = population.size() / nWorker;
-  size_t remaining = population.size() - step * nWorker;
-  size_t endRange = 0;
-
-  while (remaining != 0) {
-    startRange = endRange;
-    endRange += step + 1;
-    ranges.emplace_back(startRange, endRange);
-    remaining--;
-  }
-
-  while (endRange < population.size()) {
-    startRange = endRange;
-    endRange += step;
-    ranges.emplace_back(startRange, endRange);
-  }
 
   std::deque<std::thread> coda;
 
-  for (size_t i=0; i < ranges.size(); i++) {
-    coda.emplace_back(std::thread([&](size_t index) {
-      for (size_t j = ranges[index].first; j < ranges[index].second; j++) {
+  for (auto range: populationRanges) {
+    coda.emplace_back(std::thread([&](size_t start, size_t end) {
+      for (size_t j = start; j < end; j++) {
         std::vector<TId> &chromosome = population[j];
         double eval = 0;
         for (size_t k = 0; k < chromosome.size() - 1; k++) {
           eval += graph_->getValueEdge(chromosome[k], chromosome[k + 1]);
         }
         eval += graph_->getValueEdge(chromosome[chromosome.size() - 1], chromosome[0]);
-        chromosomeEvals[j]=std::make_pair(j, eval / chromosome.size());
+        chromosomeEvals[j] = std::make_pair(j, eval / chromosome.size());
       }
-    }, i));
+    }, range.first, range.second));
   }
 
   for (auto &it : coda) {
@@ -437,6 +398,30 @@ void TSPGeneticAlgorithmST<TId, TValue>::adjustPopulation() {
 #endif
 
 }
+
+template<typename TId, typename TValue>
+void TSPGeneticAlgorithmST<TId, TValue>::setUpRanges() {
+
+  size_t startRange = 0;
+  size_t step = totalPopulation / nWorker;
+  size_t remaining = totalPopulation - step * nWorker;
+  size_t endRange = 0;
+
+  while (remaining != 0) {
+    startRange = endRange;
+    endRange += step + 1;
+    populationRanges.emplace_back(startRange, endRange);
+    remaining--;
+  }
+
+  while (endRange < totalPopulation) {
+    startRange = endRange;
+    endRange += step;
+    populationRanges.emplace_back(startRange, endRange);
+  }
+
+}
+
 template<typename TId, typename TValue>
 void TSPGeneticAlgorithmST<TId, TValue>::setRandomGraph(size_t nNodes) {
   graph_ = new undirectedGraph<TId, TValue>(nNodes);

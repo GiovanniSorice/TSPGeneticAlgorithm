@@ -20,6 +20,8 @@ class TSPGeneticAlgorithmST : public geneticAlgorithm {
   std::vector<std::vector<TId>> intermediatePopulation;
   //! Chromosome current value
   std::vector<std::pair<size_t, double>> chromosomeEvals;
+  //! Ranges for parallel execution
+  std::vector<std::pair<size_t, size_t>> populationRanges;
   //! random probability generator
   std::random_device rd;
   std::mt19937 gen{rd()};
@@ -34,6 +36,7 @@ class TSPGeneticAlgorithmST : public geneticAlgorithm {
   int nWorker;
   double randomProbabilityGenerator();
   void adjustPopulation();
+  void setUpRanges();
 
  public:
   explicit TSPGeneticAlgorithmST();
