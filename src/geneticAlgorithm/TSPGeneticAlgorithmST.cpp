@@ -10,6 +10,8 @@
 #include <deque>
 #include <thread>
 #include "../graph/undirectedGraph.h"
+
+// #define VALUES
 #define TIME
 
 template<typename TId, typename TValue>
@@ -18,31 +20,69 @@ void TSPGeneticAlgorithmST<TId, TValue>::initializer() {
   auto start = std::chrono::high_resolution_clock::now();
 #endif
 
-  population.reserve(totalPopulation);
-  //! Fill Population
-  for (size_t i = 0; i < totalPopulation; i++) {
-    std::vector<std::pair<TId, double>> chromosome_prob;
+  std::vector<std::pair<size_t, size_t>> ranges;
+  size_t startRange = 0;
+  size_t step = totalPopulation / nWorker;
+  size_t remaining = totalPopulation - step * nWorker;
+  size_t endRange = 0;
 
-    for (auto &node : graph_->getNodes()) {
-      chromosome_prob.push_back(std::make_pair(node, randomProbabilityGenerator()));
-    }
-
-    //! sort genes in each chromosome
-    //TODO: aggiungere specifica se par o seq per funzioni libreria std
-    std::sort(chromosome_prob.begin(),
-              chromosome_prob.end(),
-              [&](const std::pair<TId, double> &geneA, const std::pair<TId, double> &geneB) {
-                return geneA.second < geneB.second;
-              });
-
-    std::vector<TId> chromosome;
-    chromosome.reserve(chromosome_prob.size());
-    for (auto &gene : chromosome_prob) {
-      chromosome.push_back(gene.first);
-    }
-    chromosome.shrink_to_fit();
-    population.push_back(chromosome);
+  while (remaining != 0) {
+    startRange = endRange;
+    endRange += step + 1;
+    ranges.emplace_back(startRange, endRange);
+    remaining--;
   }
+
+  while (endRange < totalPopulation) {
+    startRange = endRange;
+    endRange += step;
+    ranges.emplace_back(startRange, endRange);
+  }
+
+  std::deque<std::thread> coda;
+
+  population.resize(totalPopulation);
+
+  //! Fill Population
+  for (auto range : ranges) {
+    coda.emplace_back(std::thread([&](size_t start, size_t end) {
+      for (size_t i = start; i < end; i++) {
+        std::vector<std::pair<TId, double>> chromosome_prob;
+        const std::vector<TId> &nodes = graph_->getNodes();
+
+        chromosome_prob.reserve(nodes.size());
+
+        for (auto &node : nodes) {
+          chromosome_prob.emplace_back(node, randomProbabilityGenerator());
+        }
+
+        //! sort genes in each chromosome
+        //TODO: aggiungere specifica se par o seq per funzioni libreria std
+        std::sort(chromosome_prob.begin(),
+                  chromosome_prob.end(),
+                  [&](const std::pair<TId, double> &geneA, const std::pair<TId, double> &geneB) {
+                    return geneA.second < geneB.second;
+                  });
+
+        std::vector<TId> chromosome;
+        chromosome.resize(chromosome_prob.size());
+        for (size_t j = 0; j < chromosome_prob.size(); j++) {
+          chromosome[j] = chromosome_prob[j].first;
+        }
+        chromosome.shrink_to_fit();
+        population[i] = chromosome;
+      }
+
+    }, range.first, range.second));
+  }
+
+  for (auto &it : coda) {
+    if (it.joinable())
+      it.join();
+  }
+
+  coda.clear();
+
   population.shrink_to_fit();
 
 #ifdef TIME
@@ -285,12 +325,12 @@ void TSPGeneticAlgorithmST<TId, TValue>::run(int iteration) {
     chromosomeEvals.clear();
     rankedPopulation.clear();
     evaluate();
+    //std::cout << chromosomeEvals[0].second << std::endl;
 #ifdef TIME
     auto elapsed = std::chrono::high_resolution_clock::now() - start;
     auto msecs = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count();
     printf("Intermediate time (msecs): %ld %d\n", msecs, i);
 #endif
-
   }
 #ifdef VALUES
   for (auto &chromosome : chromosomeEvals) {

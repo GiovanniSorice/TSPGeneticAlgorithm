@@ -249,7 +249,7 @@ void TSPGeneticAlgorithm<TId, TValue>::run(int iteration) {
     chromosomeEvals.clear();
     rankedPopulation.clear();
     evaluate();
-    //std::cout << chromosomeEvals[0].second << std::endl;
+    std::cout << chromosomeEvals[0].second << std::endl;
 #ifdef TIME
     auto elapsed = std::chrono::high_resolution_clock::now() - start;
     auto msecs = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count();
