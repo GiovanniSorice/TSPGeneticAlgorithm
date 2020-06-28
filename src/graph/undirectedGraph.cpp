@@ -58,7 +58,7 @@ void undirectedGraph<TId, TValue>::randomInit(int seed) {
  * @param keyTo: key of the node where the edge arrives
  */
 template<typename TId, typename TValue>
-TValue undirectedGraph<TId, TValue>::getValueEdge(TId keyFrom, TId keyTo) {
+TValue undirectedGraph<TId, TValue>::getValueEdge(TId keyFrom, TId keyTo) const {
 
   auto nodeEdges = this->edges.find(keyFrom);
   if (nodeEdges == this->edges.end()) {

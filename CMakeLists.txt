@@ -26,7 +26,7 @@ add_library(TSPGeneticAlgorithm
         src/geneticAlgorithm/TSPGeneticAlgorithmOMP.cpp
         src/geneticAlgorithm/TSPGeneticAlgorithmOMP.h
         src/geneticAlgorithm/TSPGeneticAlgorithmST.cpp
-        src/geneticAlgorithm/TSPGeneticAlgorithmST.h)
+        src/geneticAlgorithm/TSPGeneticAlgorithmST.h src/geneticAlgorithm/TSPGeneticAlgorithmFF.cpp src/geneticAlgorithm/TSPGeneticAlgorithmFF.h)
 
 target_link_libraries(TSPGeneticAlgorithm
         Threads::Threads

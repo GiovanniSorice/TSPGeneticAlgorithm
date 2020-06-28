@@ -14,7 +14,7 @@ class graph {
   virtual ~graph() = default;
   explicit graph() = default;
   virtual void randomInit(int seed) = 0;
-  virtual TValue getValueEdge(TId keyFrom, TId keyTo) = 0;
+  virtual TValue getValueEdge(TId keyFrom, TId keyTo) const = 0;
   explicit graph(unsigned long long nNode) : nodes(nNode) {};
   inline explicit graph(std::vector<TId> nodes_) {
     nodes = nodes_;

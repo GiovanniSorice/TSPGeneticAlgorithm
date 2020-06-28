@@ -286,7 +286,6 @@ void TSPGeneticAlgorithmST<TId, TValue>::run(int iteration) {
   setUpRanges();
   initializer();
 
-  evaluate();
 #ifdef VALUES
   for (auto &chromosome : chromosomeEvals) {
     std::cout << chromosome.first << " " << chromosome.second << std::endl;
@@ -297,6 +296,7 @@ void TSPGeneticAlgorithmST<TId, TValue>::run(int iteration) {
 #ifdef TIME
     auto start = std::chrono::high_resolution_clock::now();
 #endif
+    evaluate();
     selectionReproduction();
     crossover();
     mutation();
@@ -304,7 +304,6 @@ void TSPGeneticAlgorithmST<TId, TValue>::run(int iteration) {
     intermediatePopulation.clear();
     chromosomeEvals.clear();
     rankedPopulation.clear();
-    evaluate();
     //std::cout << chromosomeEvals[0].second << std::endl;
 #ifdef TIME
     auto elapsed = std::chrono::high_resolution_clock::now() - start;
@@ -312,6 +311,7 @@ void TSPGeneticAlgorithmST<TId, TValue>::run(int iteration) {
     printf("Intermediate time (msecs): %ld %d\n", msecs, i);
 #endif
   }
+  evaluate();
 #ifdef VALUES
   for (auto &chromosome : chromosomeEvals) {
     std::cout << chromosome.first << " " << chromosome.second << std::endl;

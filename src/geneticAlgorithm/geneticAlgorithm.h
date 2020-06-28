@@ -7,6 +7,7 @@
 
 class geneticAlgorithm {
  public:
+  //TODO: Lasciare solo run come public, quindi togliere il resto delle funzioni
   virtual void initializer() = 0;
   virtual void evaluate() = 0;
   virtual void selectionReproduction() = 0;

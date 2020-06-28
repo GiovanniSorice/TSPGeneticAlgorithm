@@ -67,8 +67,6 @@ void TSPGeneticAlgorithm<TId, TValue>::selectionReproduction() {
   auto start = std::chrono::high_resolution_clock::now();
 #endif
 
-
-  //std::cout << std::endl << std::endl << std::endl;
   std::vector<double> randomNumber(multiplier * chromosomeEvals.size());
   //! Compute the avg value
   double avg = 0;
