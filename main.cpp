@@ -4,6 +4,7 @@
 #include "src/geneticAlgorithm/TSPGeneticAlgorithm.h"
 #include "src/geneticAlgorithm/TSPGeneticAlgorithmOMP.h"
 #include "src/geneticAlgorithm/TSPGeneticAlgorithmST.h"
+#include "src/geneticAlgorithm/TSPGeneticAlgorithmFF.h"
 
 int main(int argc, char *argv[]) {
 
@@ -42,7 +43,7 @@ int main(int argc, char *argv[]) {
   g.randomInit(5);
   */
 
-/*
+
   TSPGeneticAlgorithm<int, double> tspSeq(seed, crossoverProbability, mutationProbability);
   tspSeq.SetMultiplier(1);
   tspSeq.SetTotalPopulation(population);
@@ -57,7 +58,7 @@ int main(int argc, char *argv[]) {
   auto elapsedSeq = std::chrono::high_resolution_clock::now() - startSeq;
   auto msecSeq = std::chrono::duration_cast<std::chrono::milliseconds>(elapsedSeq).count();
   printf("Final Seq time (msecs): %ld\n", msecSeq);
-*/
+
 
 
   std::cout<<std::endl;
@@ -73,6 +74,20 @@ int main(int argc, char *argv[]) {
   auto elapsedST = std::chrono::high_resolution_clock::now() - startST;
   auto msecST = std::chrono::duration_cast<std::chrono::milliseconds>(elapsedST).count();
   printf("Final ST time (msecs): %ld\n", msecST);
+
+  std::cout << std::endl;
+
+  TSPGeneticAlgorithmFF<int, double> tspFF(seed, crossoverProbability, mutationProbability);
+  tspFF.SetMultiplier(1);
+  tspFF.SetTotalPopulation(population);
+  tspFF.setRandomGraph(numberOfNode);
+  tspFF.SetNWorker(nWorker);
+  //tsp.setGraph(&g);
+  auto startFF = std::chrono::high_resolution_clock::now();
+  tspFF.run(nIteration);
+  auto elapsedFF = std::chrono::high_resolution_clock::now() - startFF;
+  auto msecFF = std::chrono::duration_cast<std::chrono::milliseconds>(elapsedFF).count();
+  printf("Final FF time (msecs): %ld\n", msecFF);
 
 
   /*

@@ -1,7 +1,7 @@
 //
 // Created by gs1010 on 31/05/20.
 //
-#define TIME
+//#define TIME
 
 #include <random>
 #include <iostream>
@@ -225,7 +225,6 @@ void TSPGeneticAlgorithm<TId, TValue>::run(int iteration) {
 
   initializer();
 
-  evaluate();
   //std::cout << chromosomeEvals[0].second << std::endl;
 
 #ifdef VALUES
@@ -239,6 +238,7 @@ void TSPGeneticAlgorithm<TId, TValue>::run(int iteration) {
 #ifdef TIME
     auto start = std::chrono::high_resolution_clock::now();
 #endif
+    evaluate();
     selectionReproduction();
     crossover();
     mutation();
@@ -246,8 +246,6 @@ void TSPGeneticAlgorithm<TId, TValue>::run(int iteration) {
     intermediatePopulation.clear();
     chromosomeEvals.clear();
     rankedPopulation.clear();
-    evaluate();
-    std::cout << chromosomeEvals[0].second << std::endl;
 #ifdef TIME
     auto elapsed = std::chrono::high_resolution_clock::now() - start;
     auto msecs = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count();
@@ -255,6 +253,9 @@ void TSPGeneticAlgorithm<TId, TValue>::run(int iteration) {
 #endif
 
   }
+  evaluate();
+  std::cout << "Best value Seq: " << chromosomeEvals[0].second << std::endl;
+
 #ifdef VALUES
   for (auto &chromosome : chromosomeEvals) {
     std::cout << chromosome.first << " " << chromosome.second << std::endl;

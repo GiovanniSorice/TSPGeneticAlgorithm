@@ -12,7 +12,7 @@
 #include "../graph/undirectedGraph.h"
 
 // #define VALUES
-#define TIME
+//#define TIME
 
 template<typename TId, typename TValue>
 void TSPGeneticAlgorithmST<TId, TValue>::initializer() {
@@ -304,7 +304,6 @@ void TSPGeneticAlgorithmST<TId, TValue>::run(int iteration) {
     intermediatePopulation.clear();
     chromosomeEvals.clear();
     rankedPopulation.clear();
-    //std::cout << chromosomeEvals[0].second << std::endl;
 #ifdef TIME
     auto elapsed = std::chrono::high_resolution_clock::now() - start;
     auto msecs = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count();
@@ -312,6 +311,8 @@ void TSPGeneticAlgorithmST<TId, TValue>::run(int iteration) {
 #endif
   }
   evaluate();
+  std::cout << "Best value ST: " << chromosomeEvals[0].second << std::endl;
+
 #ifdef VALUES
   for (auto &chromosome : chromosomeEvals) {
     std::cout << chromosome.first << " " << chromosome.second << std::endl;
