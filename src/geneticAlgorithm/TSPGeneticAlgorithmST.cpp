@@ -311,7 +311,7 @@ void TSPGeneticAlgorithmST<TId, TValue>::run(int iteration) {
 #endif
   }
   evaluate();
-  std::cout << "Best value ST: " << chromosomeEvals[0].second << std::endl;
+  //std::cout << "Best value ST: " << chromosomeEvals[0].second << std::endl;
 
 #ifdef VALUES
   for (auto &chromosome : chromosomeEvals) {

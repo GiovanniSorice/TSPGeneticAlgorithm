@@ -254,7 +254,7 @@ void TSPGeneticAlgorithm<TId, TValue>::run(int iteration) {
 
   }
   evaluate();
-  std::cout << "Best value Seq: " << chromosomeEvals[0].second << std::endl;
+  //std::cout << "Best value Seq: " << chromosomeEvals[0].second << std::endl;
 
 #ifdef VALUES
   for (auto &chromosome : chromosomeEvals) {

@@ -26,7 +26,9 @@ add_library(TSPGeneticAlgorithm
         src/geneticAlgorithm/TSPGeneticAlgorithmOMP.cpp
         src/geneticAlgorithm/TSPGeneticAlgorithmOMP.h
         src/geneticAlgorithm/TSPGeneticAlgorithmST.cpp
-        src/geneticAlgorithm/TSPGeneticAlgorithmST.h src/geneticAlgorithm/TSPGeneticAlgorithmFF.cpp src/geneticAlgorithm/TSPGeneticAlgorithmFF.h)
+        src/geneticAlgorithm/TSPGeneticAlgorithmST.h
+        src/geneticAlgorithm/TSPGeneticAlgorithmFF.cpp
+        src/geneticAlgorithm/TSPGeneticAlgorithmFF.h)
 
 target_link_libraries(TSPGeneticAlgorithm
         Threads::Threads
@@ -42,3 +44,24 @@ set_target_properties(main PROPERTIES
         CXX_STANDARD 17
         LINKER_LANGUAGE CXX)
 target_link_libraries(main TSPGeneticAlgorithm)
+
+# create mainSeq target
+add_executable(mainSeq mainSeq.cpp)
+set_target_properties(mainSeq PROPERTIES
+        CXX_STANDARD 17
+        LINKER_LANGUAGE CXX)
+target_link_libraries(mainSeq TSPGeneticAlgorithm)
+
+# create mainST target
+add_executable(mainST mainST.cpp)
+set_target_properties(mainST PROPERTIES
+        CXX_STANDARD 17
+        LINKER_LANGUAGE CXX)
+target_link_libraries(mainST TSPGeneticAlgorithm)
+
+# create mainFF target
+add_executable(mainFF mainFF.cpp)
+set_target_properties(mainFF PROPERTIES
+        CXX_STANDARD 17
+        LINKER_LANGUAGE CXX)
+target_link_libraries(mainFF TSPGeneticAlgorithm)

@@ -85,7 +85,7 @@ class TSPGeneticAlgorithmFF : public geneticAlgorithm {
                     return chromosomeA->second > chromosomeB->second;
                   });
 
-        std::cout << "Best value: " << rankedPopulation.at(totalPopulation-1)->second << std::endl;
+        //std::cout << "Best value: " << rankedPopulation.at(totalPopulation-1)->second << std::endl;
 
         if (population.size() > rankedPopulation.size()) {
           std::random_shuffle(population.begin(), population.end());
