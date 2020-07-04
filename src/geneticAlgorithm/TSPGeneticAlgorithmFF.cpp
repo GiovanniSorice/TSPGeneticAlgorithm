@@ -21,36 +21,31 @@ double TSPGeneticAlgorithmFF<TId, TValue>::randomProbabilityGenerator() {
 }
 template<typename TId, typename TValue>
 void TSPGeneticAlgorithmFF<TId, TValue>::run(int iteration) {
-  ff::ff_farm initializationFarm;
-  std::vector<ff::ff_node *> initializerWorkers;
+  std::vector<std::unique_ptr<ff::ff_node>> initializerWorkers;
   for (size_t i = 0; i < nWorker; ++i)
-    initializerWorkers.push_back(new Initializer(graph_->getNodes(), gen));
-  initializationFarm.add_workers(initializerWorkers);
-  auto *emitterInitializer = new EmitterInitializer(totalPopulation, nWorker);
-  initializationFarm.add_emitter(emitterInitializer);
+    initializerWorkers.push_back(std::unique_ptr<Initializer>(new Initializer(graph_->getNodes(), gen)));
+  auto emitterInitializer = std::unique_ptr<EmitterInitializer>(new EmitterInitializer(totalPopulation, nWorker));
+  ff::ff_Farm<size_t> initializationFarm(std::move(initializerWorkers), std::move(emitterInitializer));
 
-  ff::ff_farm evaluateFarm;
-  std::vector<ff::ff_node *> evaluateWorkers;
+
+  std::vector<std::unique_ptr<ff::ff_node>> evaluateWorkers;
   for (size_t i = 0; i < nWorker; ++i)
-    evaluateWorkers.push_back(new Evaluate(graph_, gen));
-  evaluateFarm.add_workers(evaluateWorkers);
-  auto *cInitEEval = new collectorInitializerEmitterEvaluate(totalPopulation,
+    evaluateWorkers.push_back(std::unique_ptr<Evaluate>(new Evaluate(graph_, gen)));
+  auto cInitEEval = std::unique_ptr<collectorInitializerEmitterEvaluate>(new collectorInitializerEmitterEvaluate(totalPopulation,
                                                              iteration,
                                                              totalPopulation * crossoverProbability
-                                                                 + totalPopulation * mutationProbability);
-  evaluateFarm.add_emitter(cInitEEval);
+                                                                 + totalPopulation * mutationProbability));
+  auto sR = std::unique_ptr<selectionReproductionNode>(new selectionReproductionNode(totalPopulation, multiplier, gen));
 
-  auto *sR = new selectionReproductionNode(totalPopulation, multiplier, gen);
-  evaluateFarm.add_collector(sR);
+  ff::ff_Farm evaluateFarm(std::move(evaluateWorkers), std::move(cInitEEval), std::move(sR));
+
   //ff::ff_Pipe<size_t> pipe(initializationFarm, evaluateFarm);
 
-  ff::ff_farm crossoverMutationFarm;
-  std::vector<ff::ff_node *> crossoverMutationWorkers;
+  std::vector<std::unique_ptr<ff::ff_node>> crossoverMutationWorkers;
   for (size_t i = 0; i < nWorker; ++i)
-    crossoverMutationWorkers.push_back(new CrossoverMutation(gen));
-  crossoverMutationFarm.add_workers(crossoverMutationWorkers);
-  auto *ECrossoverMutation = new EmitterCrossoverMutation(crossoverProbability, mutationProbability, gen);
-  crossoverMutationFarm.add_emitter(ECrossoverMutation);
+    crossoverMutationWorkers.push_back(std::unique_ptr<CrossoverMutation>(new CrossoverMutation(gen)));
+  auto ECrossoverMutation = std::unique_ptr<EmitterCrossoverMutation>(new EmitterCrossoverMutation(crossoverProbability, mutationProbability, gen));
+  ff::ff_Farm crossoverMutationFarm(std::move(crossoverMutationWorkers), std::move(ECrossoverMutation));
 
   /*
   ff::ff_farm mutationFarm;
@@ -63,10 +58,13 @@ void TSPGeneticAlgorithmFF<TId, TValue>::run(int iteration) {
 */
   ff::ff_Pipe<std::pair<std::vector<TId> *, double>> pipe_with_feedback(evaluateFarm, crossoverMutationFarm);
   pipe_with_feedback.wrap_around();
+  pipe_with_feedback.isset_cleanup_nodes();
   ff::ff_Pipe<size_t> pipe(initializationFarm, pipe_with_feedback);
-
+  pipe.isset_cleanup_nodes();
   if (pipe.run_and_wait_end() < 0)
     std::cout << " running myFarm" << std::endl;
+
+
 }
 
 template<typename TId, typename TValue>
