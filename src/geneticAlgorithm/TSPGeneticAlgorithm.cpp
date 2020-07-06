@@ -225,7 +225,6 @@ void TSPGeneticAlgorithm<TId, TValue>::run(int iteration) {
 
   initializer();
 
-  //std::cout << chromosomeEvals[0].second << std::endl;
 
 #ifdef VALUES
   for (auto &chromosome : chromosomeEvals) {
@@ -239,6 +238,7 @@ void TSPGeneticAlgorithm<TId, TValue>::run(int iteration) {
     auto start = std::chrono::high_resolution_clock::now();
 #endif
     evaluate();
+    std::cout <<chromosomeEvals[0].second << std::endl;
     selectionReproduction();
     crossover();
     mutation();
@@ -254,6 +254,7 @@ void TSPGeneticAlgorithm<TId, TValue>::run(int iteration) {
 
   }
   evaluate();
+
   //std::cout << "Best value Seq: " << chromosomeEvals[0].second << std::endl;
 
 #ifdef VALUES

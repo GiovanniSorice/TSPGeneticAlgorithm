@@ -84,7 +84,7 @@ class TSPGeneticAlgorithmFF : public geneticAlgorithm {
                     //! I order backwards so I can take advantage of the pop_back later
                     return chromosomeA->second > chromosomeB->second;
                   });
-
+        std::cout << rankedPopulation.at(totalPopulation - 1)->second << std::endl;
         //std::cout << "Best value: " << rankedPopulation.at(totalPopulation-1)->second << std::endl;
 
         if (population.size() > rankedPopulation.size()) {
@@ -129,7 +129,7 @@ class TSPGeneticAlgorithmFF : public geneticAlgorithm {
                     //! I order backwards so I can take advantage of the pop_back later
                     return chromosomeA->second > chromosomeB->second;
                   });
-
+        std::cout << rankedPopulation.at(totalPopulation - 1)->second << std::endl;
         //std::cout<< "Best value: "<<rankedPopulation.at(totalPopulation - 1)->second<<std::endl;
 
         if (population.size() > rankedPopulation.size()) {
@@ -434,11 +434,6 @@ class TSPGeneticAlgorithmFF : public geneticAlgorithm {
 
   double randomProbabilityGenerator();
  public:
-  void initializer() override {};
-  void evaluate() override {};
-  void selectionReproduction() override {};
-  void crossover() override {};
-  void mutation() override {};
   void run(int iteration) override;
   explicit TSPGeneticAlgorithmFF();
   explicit TSPGeneticAlgorithmFF(int seed_);

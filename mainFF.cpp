@@ -1,9 +1,6 @@
 #include <iostream>
 #include <chrono>
 #include "src/graph/undirectedGraph.h"
-#include "src/geneticAlgorithm/TSPGeneticAlgorithm.h"
-#include "src/geneticAlgorithm/TSPGeneticAlgorithmOMP.h"
-#include "src/geneticAlgorithm/TSPGeneticAlgorithmST.h"
 #include "src/geneticAlgorithm/TSPGeneticAlgorithmFF.h"
 
 int main(int argc, char *argv[]) {
@@ -16,6 +13,11 @@ int main(int argc, char *argv[]) {
 
   const size_t numberOfNode = atoi(argv[1]);
   const size_t nPopulation = atoi(argv[2]);
+  if (nPopulation < 2) {
+    std::cout << "Population must be greater than or equal to 2"
+              << std::endl;
+    return (-1);
+  }
   const int nIteration = atoi(argv[3]);
 
   int nWorker = 1;

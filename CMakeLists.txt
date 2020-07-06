@@ -23,8 +23,6 @@ add_library(TSPGeneticAlgorithm
         src/graph/undirectedGraph.cpp
         src/graph/undirectedGraph.h
         src/graph/graph.h
-        src/geneticAlgorithm/TSPGeneticAlgorithmOMP.cpp
-        src/geneticAlgorithm/TSPGeneticAlgorithmOMP.h
         src/geneticAlgorithm/TSPGeneticAlgorithmST.cpp
         src/geneticAlgorithm/TSPGeneticAlgorithmST.h
         src/geneticAlgorithm/TSPGeneticAlgorithmFF.cpp

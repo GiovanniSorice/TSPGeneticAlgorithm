@@ -33,15 +33,16 @@ class TSPGeneticAlgorithm : public geneticAlgorithm {
   size_t totalPopulation;
   double randomProbabilityGenerator();
   void adjustPopulation();
+  void initializer();
+  void evaluate();
+  void selectionReproduction();
+  void crossover();
+  void mutation();
+
  public:
   explicit TSPGeneticAlgorithm();
   explicit TSPGeneticAlgorithm(int seed_);
   explicit TSPGeneticAlgorithm(int seed_, double crossoverProbability_, double mutationProbability_);
-  void initializer() override;
-  void evaluate() override;
-  void selectionReproduction() override;
-  void crossover() override;
-  void mutation() override;
   void run(int iteration) override;
   void setGraph(graph<TId, TValue>* graph);
   void setRandomGraph(size_t nNodes);

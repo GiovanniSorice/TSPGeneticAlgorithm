@@ -2,16 +2,16 @@
 clear
 echo "Running first test."
 
-#for nodes in 500 1000 2000; do
-#  echo "nw time nodes chromosome iteration" >>resultsSeq${nodes}.txt
-#  echo nodes $nodes
-#  for chromosome in 500 5000 20000; do
-#    cmake-build-release-xionphi/mainSeq ${nodes} ${chromosome} 10 1 123>>resultsSeq${nodes}.txt
-#  done
-#done
-#echo "Fine Seq."
-
 for nodes in 500 1000 2000; do
+  echo "nw time nodes chromosome iteration" >>resultsSeq${nodes}.txt
+  echo nodes $nodes
+  for chromosome in 500 5000 20000; do
+    cmake-build-release-xionphi/mainSeq ${nodes} ${chromosome} 10 1 123>>resultsSeq${nodes}.txt
+  done
+done
+echo "Fine Seq."
+
+for nodes in 2000; do
   echo "nw time nodes chromosome iteration" >>resultsST${nodes}${chromosome}.txt
   echo nodes $nodes
   for chromosome in 500 5000 20000; do
@@ -23,7 +23,7 @@ for nodes in 500 1000 2000; do
 done
 echo "Fine ST."
 
-for nodes in 500 1000 2000; do
+for nodes in 2000; do
   echo "nw time nodes chromosome iteration" >>resultsFF${nodes}${chromosome}.txt
   echo nodes $nodes
   for chromosome in 500 5000 20000; do
