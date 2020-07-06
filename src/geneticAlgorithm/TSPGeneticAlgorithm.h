@@ -13,7 +13,6 @@ template<typename TId, typename TValue>
 class TSPGeneticAlgorithm : public geneticAlgorithm {
  private:
   graph<TId, TValue> *graph_;
-  //! TODO: Creare la top list dei migliori cromosomi
   //! population of chromosome
   std::vector<std::vector<TId >> population;
   std::vector<std::vector<TId >> rankedPopulation;

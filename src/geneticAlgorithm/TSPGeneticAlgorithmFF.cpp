@@ -39,23 +39,13 @@ void TSPGeneticAlgorithmFF<TId, TValue>::run(int iteration) {
 
   ff::ff_Farm evaluateFarm(std::move(evaluateWorkers), std::move(cInitEEval), std::move(sR));
 
-  //ff::ff_Pipe<size_t> pipe(initializationFarm, evaluateFarm);
-
   std::vector<std::unique_ptr<ff::ff_node>> crossoverMutationWorkers;
   for (size_t i = 0; i < nWorker; ++i)
     crossoverMutationWorkers.push_back(std::unique_ptr<CrossoverMutation>(new CrossoverMutation(gen)));
   auto ECrossoverMutation = std::unique_ptr<EmitterCrossoverMutation>(new EmitterCrossoverMutation(crossoverProbability, mutationProbability, gen));
   ff::ff_Farm crossoverMutationFarm(std::move(crossoverMutationWorkers), std::move(ECrossoverMutation));
 
-  /*
-  ff::ff_farm mutationFarm;
-  std::vector<ff::ff_node *> mutationWorkers;
-  for (size_t i = 0; i < nWorker; ++i)
-    mutationWorkers.push_back(new Mutation(gen));
-  mutationFarm.add_workers(mutationWorkers);
-  auto *EMutation = new EmitterMutation(mutationProbability, gen);
-  mutationFarm.add_emitter(EMutation);
-*/
+
   ff::ff_Pipe<std::pair<std::vector<TId> *, double>> pipe_with_feedback(evaluateFarm, crossoverMutationFarm);
   pipe_with_feedback.wrap_around();
   pipe_with_feedback.isset_cleanup_nodes();

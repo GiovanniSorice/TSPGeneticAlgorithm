@@ -9,7 +9,6 @@ in a graph. Graph arcs represents connections among cities (roads) and are marke
 between the source and destination city.
 Genetic algorithms mimic genetic evolution of species. A set of chromosomes are defined and used to
 simulate a given number of “generations”. Each generation is made by chromosomes deriving from parent
-
 ones through cross-over or mutation. Cross-over takes two parent chromosomes and generates a
 chromosome made by segments from either from parent A or from parent B corresponding positions.
 Mutations randomly changes (or exchanges) positions in a single chromosome. Cross-over and mutations
@@ -22,11 +21,6 @@ from I to j in the first chromosome with the order list of cities not appearing 
 chromosome taken from the second one in the order they are stored there. Mutation can be
 implemented exchanging two random positions i and j in the chromosome. Fitness is the length of the
 path represented in the chromosome.
-
-## Challenges
-A problem that I faced since the beginning was that each filter takes different times to be applied. 
-For this reason, I think that the best implementation could be the one in which every filter have a pool of worker associated.
-Also, I think that the number of worker of each pool has to be directly proportional to the time spent applying the filter.
 
 ## Getting Started
 
@@ -47,6 +41,11 @@ Now build the project:
 cmake --build .
 ```
 
+In both classes geneticAlgorithm and TSPGeneticAlgorithmST you can define the variable ```TIME``` and ```VALUES```.
+In this way you can see in real time the time spent in each iteration and stage of the pipeline. 
+Moreover, with ```VALUES``` you can see the current best chromosome value in the population.
+
+
 ### Running
 The executable can be found in the ```build/``` directory. 
 There are 4 executable file:
@@ -57,6 +56,9 @@ There are 4 executable file:
 Just run it with:
 
 ```./build/${name_of_executable} numberOfNode population nIteration [nWorker] [seed] [crossoverProbability] [mutationProbability]``` 
+
+E.g:
+```./build/mainST 2000 20000 10 64 123``` 
 
 All the variable between "[]" are optional.
 Where the numberOfNode is the total number of nodes in the undirected graph.
@@ -87,7 +89,7 @@ In the sub-folder "report/BenchMarkTSP" you can find the data used for the speed
 ### Plotting
 
 To obtain the data used in the results shown you have to build the project.  
-The three executables obtained must be put in a folder called ```cmake-build-release-xionphi/``` in order for the ```script.sh``` script to work properly. These three executable should be called respectively ```mainSeq```, ```mainST``` and ```mainFF```.  
+The three executables obtained must be put in a folder called ```build/``` in order for the ```script.sh``` script to work properly. These three executable should be called respectively ```mainSeq```, ```mainST``` and ```mainFF```.  
 
 *To change the namings just edit the variables in *```script.sh```.
 
@@ -96,4 +98,4 @@ Running the script with ```./script.sh``` will generate the data for plotting in
 ```load "<script-name.gp>"```
 
 ## Acknowledgments
-This project was developed as final assignment of the course [Parallel and Distributed Systems](http://didawiki.di.unipi.it/doku.php/magistraleinformaticanetworking/spm/sdpm09support) at University of Pisa under the guide of [Prof. Marco Danelutto](http://calvados.di.unipi.it/paragroup/danelutto/) and [Prof. Massimo Torquati](http://calvados.di.unipi.it/paragroup/torquati/).
+This work was developed as final project of the course [Parallel and Distributed Systems](http://didawiki.di.unipi.it/doku.php/magistraleinformaticanetworking/spm/sdpm09support) at University of Pisa under the guide of [Prof. Marco Danelutto](http://calvados.di.unipi.it/paragroup/danelutto/) and [Prof. Massimo Torquati](http://calvados.di.unipi.it/paragroup/torquati/).

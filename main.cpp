@@ -42,21 +42,11 @@ int main(int argc, char *argv[]) {
     mutationProbability = std::stod(argv[7]);
   }
 
-  /*
-  undirectedGraph<int, double> g(200);
-  g.randomInit(5);
-  */
-
 
   TSPGeneticAlgorithm<int, double> tspSeq(seed, crossoverProbability, mutationProbability);
   tspSeq.SetMultiplier(1);
   tspSeq.SetTotalPopulation(nPopulation);
-  //auto startGraph = std::chrono::high_resolution_clock::now();
   tspSeq.setRandomGraph(numberOfNode);
-  //auto elapsedGraph = std::chrono::high_resolution_clock::now() - startGraph;
-  //auto msecGraph = std::chrono::duration_cast<std::chrono::milliseconds>(elapsedGraph).count();
-  //printf("setRandomGraph time (msecs): %ld\n", msecGraph);
-
   auto startSeq = std::chrono::high_resolution_clock::now();
   tspSeq.run(nIteration);
   auto elapsedSeq = std::chrono::high_resolution_clock::now() - startSeq;
@@ -72,7 +62,6 @@ int main(int argc, char *argv[]) {
   tspST.SetTotalPopulation(nPopulation);
   tspST.setRandomGraph(numberOfNode);
   tspST.SetNWorker(nWorker);
-  //tsp.setGraph(&g);
   auto startST = std::chrono::high_resolution_clock::now();
   tspST.run(nIteration);
   auto elapsedST = std::chrono::high_resolution_clock::now() - startST;
@@ -86,25 +75,10 @@ int main(int argc, char *argv[]) {
   tspFF.SetTotalPopulation(nPopulation);
   tspFF.setRandomGraph(numberOfNode);
   tspFF.SetNWorker(nWorker);
-  //tsp.setGraph(&g);
   auto startFF = std::chrono::high_resolution_clock::now();
   tspFF.run(nIteration);
   auto elapsedFF = std::chrono::high_resolution_clock::now() - startFF;
   auto msecFF = std::chrono::duration_cast<std::chrono::milliseconds>(elapsedFF).count();
   printf("Final FF time (msecs): %ld\n", msecFF);
 
-
-  /*
-  TSPGeneticAlgorithmOMP<int, double> tspOMP(seed, crossoverProbability, mutationProbability);
-  tspOMP.SetMultiplier(1);
-  tspOMP.SetTotalPopulation(population);
-  tspOMP.setRandomGraph(numberOfNode);
-  tspOMP.SetNWorker(nWorker);
-  //tsp.setGraph(&g);
-  auto startOMP = std::chrono::high_resolution_clock::now();
-  tspOMP.run(nIteration);
-  auto elapsedOMP = std::chrono::high_resolution_clock::now() - startOMP;
-  auto msecOMP = std::chrono::duration_cast<std::chrono::milliseconds>(elapsedOMP).count();
-  printf("Final OMP time (msecs): %ld\n", msecOMP);
-  */
 }

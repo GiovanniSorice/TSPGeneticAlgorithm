@@ -11,7 +11,7 @@
 #include <thread>
 #include "../graph/undirectedGraph.h"
 
-// #define VALUES
+//#define VALUES
 //#define TIME
 
 template<typename TId, typename TValue>
@@ -38,7 +38,6 @@ void TSPGeneticAlgorithmST<TId, TValue>::initializer() {
         }
 
         //! sort genes in each chromosome
-        //TODO: aggiungere specifica se par o seq per funzioni libreria std
         std::sort(chromosome_prob.begin(),
                   chromosome_prob.end(),
                   [&](const std::pair<TId, double> &geneA, const std::pair<TId, double> &geneB) {
@@ -93,7 +92,6 @@ void TSPGeneticAlgorithmST<TId, TValue>::selectionReproduction() {
 #endif
 
 
-  //std::cout << std::endl << std::endl << std::endl;
   std::vector<double> randomNumber(multiplier * chromosomeEvals.size());
   //! Compute the avg value
   double avg = 0;
@@ -124,7 +122,6 @@ void TSPGeneticAlgorithmST<TId, TValue>::selectionReproduction() {
   for (size_t i = 0; i < multiplier * chromosomeEvals.size();) {
     if (chromosomeEvals[chromosomeEvalsIndex].second >= randomNumber[i]) {
       intermediatePopulation.emplace_back(population[chromosomeEvals[chromosomeEvalsIndex].first]);
-      //std::cout << chromosomeEvals[chromosomeEvalsIndex].first << std::endl;
       i++;
     } else {
       chromosomeEvalsIndex++;
@@ -179,7 +176,6 @@ void TSPGeneticAlgorithmST<TId, TValue>::crossover() {
 
   std::uniform_int_distribution<size_t> crossoverDistribution{0, graph_->getNodesSize()};
   population.clear();
-  // TODO: cambiare con population.resize(totalPopulation)
   population.resize(totalCrossover);
 
   std::deque<std::thread> coda;
@@ -297,6 +293,9 @@ void TSPGeneticAlgorithmST<TId, TValue>::run(int iteration) {
     auto start = std::chrono::high_resolution_clock::now();
 #endif
     evaluate();
+#ifdef VALUES
+    std::cout <<"Best value: "<<chromosomeEvals[0].second << std::endl;
+#endif
     selectionReproduction();
     crossover();
     mutation();
@@ -350,7 +349,6 @@ void TSPGeneticAlgorithmST<TId, TValue>::evaluate() {
 
   coda.clear();
   chromosomeEvals.shrink_to_fit();
-  //TODO: aggiungere specifica se par o seq per funzioni libreria std
   std::sort(chromosomeEvals.begin(),
             chromosomeEvals.end(),
             [&](const std::pair<TId, double> &chromosomeA, const std::pair<size_t, double> &chromosomeB) {

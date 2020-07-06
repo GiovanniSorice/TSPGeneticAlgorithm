@@ -46,7 +46,6 @@ class TSPGeneticAlgorithmFF : public geneticAlgorithm {
         }
 
         //! sort genes in each chromosome
-        //TODO: aggiungere specifica se par o seq per funzioni libreria std
         std::sort(chromosome_prob.begin(),
                   chromosome_prob.end(),
                   [&](const std::pair<TId, double> &geneA, const std::pair<TId, double> &geneB) {
@@ -84,8 +83,10 @@ class TSPGeneticAlgorithmFF : public geneticAlgorithm {
                     //! I order backwards so I can take advantage of the pop_back later
                     return chromosomeA->second > chromosomeB->second;
                   });
-        std::cout << rankedPopulation.at(totalPopulation - 1)->second << std::endl;
-        //std::cout << "Best value: " << rankedPopulation.at(totalPopulation-1)->second << std::endl;
+#ifdef VALUES
+        std::cout << "Best value: " << rankedPopulation.at(totalPopulation-1)->second << std::endl;
+#endif
+
 
         if (population.size() > rankedPopulation.size()) {
           std::random_shuffle(population.begin(), population.end());
@@ -129,8 +130,9 @@ class TSPGeneticAlgorithmFF : public geneticAlgorithm {
                     //! I order backwards so I can take advantage of the pop_back later
                     return chromosomeA->second > chromosomeB->second;
                   });
-        std::cout << rankedPopulation.at(totalPopulation - 1)->second << std::endl;
-        //std::cout<< "Best value: "<<rankedPopulation.at(totalPopulation - 1)->second<<std::endl;
+#ifdef VALUES
+        std::cout << "Best value: " << rankedPopulation.at(totalPopulation-1)->second << std::endl;
+#endif
 
         if (population.size() > rankedPopulation.size()) {
           std::random_shuffle(population.begin(), population.end());
@@ -349,7 +351,6 @@ class TSPGeneticAlgorithmFF : public geneticAlgorithm {
           }
         }
 
-        //TODO: Verificare correttezza delete
         delete crossoverPair;
         this->ff_send_out(chromosomePop);
       } else {
@@ -373,6 +374,7 @@ class TSPGeneticAlgorithmFF : public geneticAlgorithm {
     std::mt19937 &gen;
   };
 
+  /*
   struct EmitterMutation : ff::ff_monode_t<std::vector<std::vector<TId> *>> {
 
     explicit EmitterMutation(const double mutationProbability_, std::mt19937 &generator) :
@@ -417,7 +419,7 @@ class TSPGeneticAlgorithmFF : public geneticAlgorithm {
 
     std::mt19937 &gen;
   };
-
+*/
   graph<TId, TValue> *graph_;
   //! random probability generator
   std::random_device rd;

@@ -40,25 +40,19 @@ int main(int argc, char *argv[]) {
     mutationProbability = std::stod(argv[7]);
   }
 
-  /*
-  undirectedGraph<int, double> g(200);
-  g.randomInit(5);
-  */
-
-
   TSPGeneticAlgorithm<int, double> tspSeq(seed, crossoverProbability, mutationProbability);
   tspSeq.SetMultiplier(1);
   tspSeq.SetTotalPopulation(nPopulation);
-  //auto startGraph = std::chrono::high_resolution_clock::now();
   tspSeq.setRandomGraph(numberOfNode);
-  //auto elapsedGraph = std::chrono::high_resolution_clock::now() - startGraph;
-  //auto msecGraph = std::chrono::duration_cast<std::chrono::milliseconds>(elapsedGraph).count();
-  //printf("setRandomGraph time (msecs): %ld\n", msecGraph);
-
   auto startSeq = std::chrono::high_resolution_clock::now();
   tspSeq.run(nIteration);
   auto elapsedSeq = std::chrono::high_resolution_clock::now() - startSeq;
   auto msecSeq = std::chrono::duration_cast<std::chrono::milliseconds>(elapsedSeq).count();
-  printf("%d %ld %ld %ld %d\n", nWorker, msecSeq, numberOfNode, nPopulation, nIteration);
+  printf("nWorker: %d msecSeq: %ld numberOfNode: %ld nPopulation: %ld nIteration: %d\n",
+         1,
+         msecSeq,
+         numberOfNode,
+         nPopulation,
+         nIteration);
 
 }

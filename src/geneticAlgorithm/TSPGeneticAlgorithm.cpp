@@ -1,7 +1,6 @@
 //
 // Created by gs1010 on 31/05/20.
 //
-//#define TIME
 
 #include <random>
 #include <iostream>
@@ -9,6 +8,10 @@
 #include <chrono>
 #include "TSPGeneticAlgorithm.h"
 #include "../graph/undirectedGraph.h"
+
+//#define VALUES
+//#define TIME
+
 template<typename TId, typename TValue>
 void TSPGeneticAlgorithm<TId, TValue>::initializer() {
 #ifdef TIME
@@ -24,7 +27,6 @@ void TSPGeneticAlgorithm<TId, TValue>::initializer() {
     }
 
     //! sort genes in each chromosome
-    //TODO: aggiungere specifica se par o seq per funzioni libreria std
     std::sort(chromosome_prob.begin(),
               chromosome_prob.end(),
               [&](const std::pair<TId, double> &geneA, const std::pair<TId, double> &geneB) {
@@ -97,7 +99,6 @@ void TSPGeneticAlgorithm<TId, TValue>::selectionReproduction() {
   for (size_t i = 0; i < multiplier * chromosomeEvals.size();) {
     if (chromosomeEvals[chromosomeEvalsIndex].second >= randomNumber[i]) {
       intermediatePopulation.push_back(population[chromosomeEvals[chromosomeEvalsIndex].first]);
-      //std::cout << chromosomeEvals[chromosomeEvalsIndex].first << std::endl;
       i++;
     } else {
       chromosomeEvalsIndex++;
@@ -117,8 +118,6 @@ void TSPGeneticAlgorithm<TId, TValue>::crossover() {
 #endif
 
   std::random_shuffle(intermediatePopulation.begin(), intermediatePopulation.end());
-  // Possibile scegliere prima le coppie che dovranno essere usate nella fase di crossover, inserirle in un array secondario e modificarle in modo da
-  // usare la vectorization
   std::uniform_int_distribution<size_t> crossoverDistribution{0, graph_->getNodesSize()};
   population.clear();
   size_t selected = 0;
@@ -238,7 +237,9 @@ void TSPGeneticAlgorithm<TId, TValue>::run(int iteration) {
     auto start = std::chrono::high_resolution_clock::now();
 #endif
     evaluate();
-    std::cout <<chromosomeEvals[0].second << std::endl;
+#ifdef VALUES
+    std::cout <<"Best value: "<<chromosomeEvals[0].second << std::endl;
+#endif
     selectionReproduction();
     crossover();
     mutation();
@@ -280,7 +281,6 @@ void TSPGeneticAlgorithm<TId, TValue>::evaluate() {
     currentChromosomeIndex++;
   }
 
-  //TODO: aggiungere specifica se par o seq per funzioni libreria std
   std::sort(chromosomeEvals.begin(),
             chromosomeEvals.end(),
             [&](const std::pair<TId, double> &chromosomeA, const std::pair<size_t, double> &chromosomeB) {

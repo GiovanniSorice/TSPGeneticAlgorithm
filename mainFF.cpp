@@ -40,10 +40,7 @@ int main(int argc, char *argv[]) {
     mutationProbability = std::stod(argv[7]);
   }
 
-  /*
-  undirectedGraph<int, double> g(200);
-  g.randomInit(5);
-  */
+
 
 
 
@@ -52,11 +49,15 @@ int main(int argc, char *argv[]) {
   tspFF.SetTotalPopulation(nPopulation);
   tspFF.setRandomGraph(numberOfNode);
   tspFF.SetNWorker(nWorker);
-  //tsp.setGraph(&g);
   auto startFF = std::chrono::high_resolution_clock::now();
   tspFF.run(nIteration);
   auto elapsedFF = std::chrono::high_resolution_clock::now() - startFF;
   auto msecFF = std::chrono::duration_cast<std::chrono::milliseconds>(elapsedFF).count();
-  printf("%d %ld %ld %ld %d\n", nWorker, msecFF, numberOfNode, nPopulation, nIteration);
+  printf("nWorker: %d msecFF: %ld numberOfNode: %ld nPopulation: %ld nIteration: %d\n",
+         nWorker,
+         msecFF,
+         numberOfNode,
+         nPopulation,
+         nIteration);
 
 }
