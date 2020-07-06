@@ -1,0 +1,65 @@
+SpeedUp:  
+
+500x500 Sequential ms time: 1915
+
+500x5000 Sequential ms time: 19752
+
+500x20000 Sequential ms time: 81710
+
+1000x500 Sequential ms time: 4839
+
+1000x5000 Sequential ms time: 47443
+
+1000x20000 Sequential ms time: 193559
+
+2000x500 Sequential ms time: 11651
+
+2000x5000 Sequential ms time: 121935
+
+2000x20000 Sequential ms time: 444579
+
+
+
+Scalability: 
+
+	500x500:
+		C++ Threads: 1978 ms 
+		
+		FF: 1851 ms
+	500x5000:
+		C++ Threads: 20172 ms 
+		
+		FF: 18905 ms
+	500x20000:
+		C++ Threads: 80580 ms 
+		
+		FF: 83759 ms
+	1000x500:
+		C++ Threads: 4913 ms 
+		
+		FF: 4609 ms
+	1000x5000:
+		C++ Threads: 49624 ms 
+		
+		FF: 46665 ms
+	1000x20000:
+		C++ Threads: 198902 ms 
+		
+		FF: 187322 ms
+	2000x500:
+		C++ Threads: 12907 ms 
+		
+		FF: 12148 ms
+	2000x5000:
+		C++ Threads: 127975 ms 
+		
+		FF: 123074 ms
+	2000x20000:
+		C++ Threads: 507265 ms 
+		
+		FF: 490276 ms
+
+
+
+
+
